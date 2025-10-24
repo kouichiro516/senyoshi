@@ -9,125 +9,362 @@
     --accent: #0b70ff;
   }
   html, body { height: 100%; }
-  body{font-family:system-ui,Meiryo,Segoe UI,sans-serif; margin:0; padding:24px; box-sizing:border-box;}
-  .tabs{display:flex;gap:8px;margin-bottom:12px}
-  .tab{padding:8px 12px;border:1px solid #bbb;border-radius:8px;cursor:pointer;user-select:none}
-  .tab.active{background:#eef}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; margin:0; padding:0; box-sizing:border-box; background:#f8fafc; min-height:100vh; line-height:1.6;}
+  .tabs{display:flex;gap:4px;margin-bottom:24px;background:#f8fafc;border-radius:12px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:1px solid #e2e8f0;}
+  .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;user-select:none;font-weight:600;font-size:14px;color:#64748b;background:transparent;transition:all 0.2s ease;}
+  .tab.active{background:#3b82f6;color:#ffffff;box-shadow:0 2px 4px rgba(59,130,246,0.3);}
   .hidden{display:none}
-  .grid{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
-  .zone{flex:1 1 360px;border:2px dashed #999;border-radius:12px;padding:16px;cursor:pointer;min-height:110px;transition:background-color .15s, border-color .15s, box-shadow .15s}
-  .zone:hover,.zone.active{background:var(--zone-hover-bg); border-color:var(--zone-hover-bd); box-shadow:0 0 0 3px var(--zone-hover-shadow) inset}
-  .hint{color:#666;font-size:12px;margin-top:6px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:24px;margin-bottom:24px;}
+  .zone{border:2px dashed #e2e8f0;border-radius:12px;padding:24px;cursor:pointer;min-height:200px;background:#ffffff;transition:all 0.2s ease;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
+  .zone:hover,.zone.active{background:#f8fafc; border-color:#3b82f6; box-shadow:0 8px 16px rgba(0,0,0,0.1); transform:translateY(-1px);}
+  .hint{color:#94a3b8;font-size:12px;margin-top:6px}
   .radios label{margin-right:10px}
   .toolbar{display:flex; gap:8px; margin:8px 0}
-  .btn{padding:10px 14px; border:1px solid #bbb; border-radius:10px; background:#fff; cursor:pointer}
-  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  .btn{padding:12px 20px; border:2px solid #3b82f6; border-radius:10px; background:#3b82f6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; text-decoration:none; display:inline-block; box-shadow:0 2px 4px rgba(59,130,246,0.3);}
+  .btn:hover{background:#2563eb; border-color:#2563eb; transform:translateY(-1px); box-shadow:0 4px 8px rgba(59,130,246,0.4);}
+  #runBtn:hover{transform:translateY(-2px); box-shadow:0 15px 35px rgba(102,126,234,0.4);}
   .btn[disabled]{opacity:.55; cursor:not-allowed}
   td[contenteditable="true"]{background:#fffbe6}
   tr.selected{outline:2px solid #2ecc71}
-  table{border-collapse:collapse; min-width:900px}
-  th, td{border:1px solid #ddd; padding:6px 8px; white-space:nowrap; font-size:13px}
+  table{border-collapse:collapse; min-width:900px; width:100%;}
+  th{background:#f8fafc; border:1px solid #e2e8f0; padding:12px 16px; font-size:14px; font-weight:600; color:#1e293b; text-align:left;}
+  td{border:1px solid #e2e8f0; padding:12px 16px; font-size:14px; color:#374151;}
   /* DB全画面高さ用のラッパ */
-  .db-wrap{overflow:auto; border:1px solid #eee; border-radius:8px; padding:8px; margin-top:8px; height: 50vh;} /* 初期値。JSでリサイズ */
+  .db-wrap{overflow:auto; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-top:16px; height: 50vh; background:#ffffff;}
   /* ステータス/スピナー */
   .status{margin-left:10px; color:#555}
   .spinner{display:inline-block; width:1em; height:1em; border:2px solid #999; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-2px; margin-right:6px}
   @keyframes spin{to{transform:rotate(360deg)}}
   .progress{display:inline-block; min-width:80px}
 
-/* per-file settings UI (gear panel) */
-.filechip{position:relative}
-.filechip .gear{
-  position:absolute; left:-6px; top:-6px; width:16px; height:16px; line-height:14px;
-  text-align:center; font-size:12px; border:1px solid #d0d7de; border-radius:50%;
-  background:#fff; color:#0366d6; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.filecfg{
-  position:absolute; z-index:20; top:42px; left:0; min-width:240px;
-  background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:10px;
-  box-shadow:0 8px 24px rgba(0,0,0,.12)}
-.filecfg h4{margin:0 0 6px; font-size:12px; color:#555; max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.filecfg .row{display:flex; align-items:center; gap:8px; margin:6px 0}
-.filecfg .row label{font-size:12px; color:#333; white-space:nowrap}
-.filecfg .row select{font-size:12px}
-.filecfg .actions{display:flex; gap:8px; justify-content:flex-end; margin-top:8px}
-.filecfg .actions button{font-size:12px; padding:4px 10px}
+  .filelist{display:flex; flex-direction:column; gap:8px; max-height:120px; overflow-y:auto; margin-bottom:12px;}
+  .filechip{display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid #e2e8f0; border-radius:12px; background:#ffffff; transition:all 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+  .filechip:hover{border-color:#667eea; background:#f8fafc; transform:translateY(-1px); box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+  .filechip svg{width:20px; height:20px; flex:0 0 auto; color:#10b981}
+  .filechip .name{font-size:14px; color:#1a202c; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .filechip .size{font-size:12px; color:#718096; font-weight:500;}
+  .filechip .del{cursor:pointer; border:none; background:#fee2e2; color:#dc2626; font-size:12px; line-height:1; padding:6px 8px; border-radius:8px; transition:all 0.2s ease; font-weight:600;}
+  .filechip .del:hover{background:#fecaca; transform:scale(1.05);}
+  .addbtn{padding:12px 16px; border:2px dashed #cbd5e0; background:transparent; border-radius:12px; cursor:pointer; color:#4a5568; font-size:14px; font-weight:600; transition:all 0.2s ease; text-align:center;}
+  .addbtn:hover{border-color:#667eea; color:#667eea; background:#f7fafc;}
+  .radio-label:hover{border-color:#667eea; background:#f8fafc; transform:translateY(-1px); box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+  .radio-label:has(input:checked){border-color:#667eea; background:linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%); box-shadow:0 4px 6px rgba(102,126,234,0.2);}
+  select:hover{border-color:#667eea; box-shadow:0 4px 6px rgba(0,0,0,0.1);}
 </style>
 
-<div class="tabs">
-  <div id="tab-input" class="tab active">作成</div>
-  <div id="tab-db" class="tab">DB</div>
-</div>
-
 <section id="panel-input">
-  <form id="makeForm" enctype="multipart/form-data" onsubmit="return false;">
+  <div style="width:100%; padding:0 24px; margin-top:0;">
+    <div style="background:#ffffff; border-radius:16px; padding:32px; box-shadow:0 4px 6px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
+      <div class="tabs" style="margin-bottom:32px;">
+        <div id="tab-input" class="tab active">📝 作成</div>
+        <div id="tab-db" class="tab">🗃️ データベース</div>
+      </div>
+      <div id="input-content">
+        <div style="text-align:center; margin-bottom:32px;">
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; background:#3b82f6; border-radius:12px; margin-bottom:16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14,2 14,8 20,8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10,9 9,9 8,9"></polyline>
+            </svg>
+          </div>
+          <h1 style="font-size:28px; font-weight:700; color:#1e293b; margin:0 0 8px 0;">事業計画変更届出書作成システム</h1>
+          <p style="color:#64748b; margin:0; font-size:16px;">連絡書をアップロードして、事業計画変更届出書を簡単に作成できます</p>
+        </div>
+        <form id="makeForm" enctype="multipart/form-data" onsubmit="return false;">
     <div class="grid">
       <div class="zone" id="incZone" tabindex="0">
-        <b>① 連絡書（増車）</b><br>
-        <label for="incInput" style="display:inline-block;margin-top:6px">ここをクリック / ファイルをドロップ</label>
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; background:#10b981; border-radius:12px; margin-bottom:12px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17,8 12,3 7,8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <h3 style="font-size:18px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">① 連絡書（増車）</h3>
+          <p style="color:#64748b; font-size:14px; margin:0;">ここをクリック / ファイルをドロップ</p>
+        </div>
         <input id="incInput" type="file" name="increase_files" multiple accept=".xlsx" hidden>
-        <div class="hint">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="incCount" class="hint"></span></div>
+        <label for="incInput" style="display:block; width:100%; height:100%; position:absolute; top:0; left:0; cursor:pointer;"></label>
+        <div style="position:absolute; bottom:16px; left:16px; right:16px;">
+          <div style="font-size:12px; color:#718096; text-align:center; margin-bottom:12px;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="incCount" style="font-weight:600; color:#667eea;"></span></div>
+          <div id="incList" class="filelist" aria-live="polite"></div>
+          <button type="button" id="incAddBtn" class="addbtn">+ ファイルを追加</button>
+        </div>
       </div>
       <div class="zone" id="decZone" tabindex="0">
-        <b>② 連絡書（減車）</b><br>
-        <label for="decInput" style="display:inline-block;margin-top:6px">ここをクリック / ファイルをドロップ</label>
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; background:#f59e0b; border-radius:12px; margin-bottom:12px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7,10 12,15 17,10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <h3 style="font-size:18px; font-weight:600; color:#1e293b; margin:0 0 4px 0;">② 連絡書（減車）</h3>
+          <p style="color:#64748b; font-size:14px; margin:0;">ここをクリック / ファイルをドロップ</p>
+        </div>
         <input id="decInput" type="file" name="decrease_files" multiple accept=".xlsx" hidden>
-        <div class="hint">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="decCount" class="hint"></span></div>
+        <label for="decInput" style="display:block; width:100%; height:100%; position:absolute; top:0; left:0; cursor:pointer;"></label>
+        <div style="position:absolute; bottom:16px; left:16px; right:16px;">
+          <div style="font-size:12px; color:#718096; text-align:center; margin-bottom:12px;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="decCount" style="font-weight:600; color:#667eea;"></span></div>
+          <div id="decList" class="filelist" aria-live="polite"></div>
+          <button type="button" id="decAddBtn" class="addbtn">+ ファイルを追加</button>
+        </div>
       </div>
     </div>
-    <div style="margin-top:14px"><b>③ 種別（保存のみ）</b></div>
-    <div class="radios">
-      <label><input type="radio" name="car_type" value="普通" checked>普通</label>
-      <label><input type="radio" name="car_type" value="小型">小型</label>
-      <label><input type="radio" name="car_type" value="けん引">けん引</label>
-      <label><input type="radio" name="car_type" value="被けん引">被けん引</label>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;">
+      <div style="background:#ffffff; border-radius:12px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
+        <h3 style="font-size:16px; font-weight:600; color:#1e293b; margin:0 0 16px 0; display:flex; align-items:center; gap:8px;">
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:#3b82f6; color:white; border-radius:4px; font-size:11px; font-weight:700;">3</span>
+          種別（保存のみ）
+        </h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
+            <input type="radio" name="car_type" value="普通" checked style="accent-color:#667eea;">
+            <span style="font-weight:600; color:#1a202c;">普通</span>
+          </label>
+          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
+            <input type="radio" name="car_type" value="小型" style="accent-color:#667eea;">
+            <span style="font-weight:600; color:#1a202c;">小型</span>
+          </label>
+          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
+            <input type="radio" name="car_type" value="けん引" style="accent-color:#667eea;">
+            <span style="font-weight:600; color:#1a202c;">けん引</span>
+          </label>
+          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
+            <input type="radio" name="car_type" value="被けん引" style="accent-color:#667eea;">
+            <span style="font-weight:600; color:#1a202c;">被けん引</span>
+          </label>
+        </div>
+      </div>
+      <div style="background:#ffffff; border-radius:12px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
+        <h3 style="font-size:16px; font-weight:600; color:#1e293b; margin:0 0 16px 0; display:flex; align-items:center; gap:8px;">
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:#3b82f6; color:white; border-radius:4px; font-size:11px; font-weight:700;">4</span>
+          積載トン数
+        </h3>
+        <select id="incWeight" name="inc_weight_class" style="width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; font-weight:600; color:#1a202c; background:#ffffff; transition:all 0.2s ease;">
+          <option value="to_2t">2.0トンまで</option>
+          <option value="2t_long">2.0トンロング</option>
+          <option value="over_2t_long_to_7_5t">2.0トンロング超～7.5トンまで</option>
+          <option value="over_7_5t">7.5トンを超えるもの</option>
+        </select>
+        <input type="hidden" id="decWeightHidden" name="dec_weight_class" value="to_2t">
+      </div>
     </div>
-    <div style="margin-top:16px">
-      <button id="runBtn" class="btn primary">作成してダウンロード</button>
-      <span id="upStatus" class="status"></span>
-    </div>
-    <input type="hidden" id="inc_meta" name="inc_meta">
-  <input type="hidden" id="dec_meta" name="dec_meta">
-</form>
-</section>
 
-<section id="panel-db" class="hidden">
-  <div class="toolbar">
-    <button id="db-edit" class="btn">編集開始</button>
-    <button id="db-add" class="btn">行を追加</button>
-    <button id="db-del" class="btn">選択行を削除</button>
-    <button id="db-save" class="btn">保存</button>
-    <a id="db-download" class="btn" href="/db/csv">CSV</a>
-    <span id="db-msg" style="margin-left:8px;color:#666"></span>
-  </div>
-  <div id="dbWrap" class="db-wrap">
-    <table id="db-table"></table>
+    <div style="margin-top:32px; text-align:center;">
+      <button id="runBtn" style="background:#3b82f6; color:white; border:none; padding:16px 32px; font-size:16px; font-weight:600; border-radius:12px; cursor:pointer; transition:all 0.2s ease; box-shadow:0 4px 12px rgba(59,130,246,0.3);">
+        <span style="display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7,10 12,15 17,10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          作成してダウンロード
+        </span>
+      </button>
+        <div id="upStatus" style="margin-top:16px; font-weight:500; color:#64748b; font-size:14px;"></div>
+      </div>
+      </form>
+      </div>
+
+      <div id="db-content" class="hidden">
+        <div style="text-align:center; margin-bottom:32px;">
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; background:#3b82f6; border-radius:12px; margin-bottom:16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="9" x2="15" y2="9"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+          </div>
+          <h1 style="font-size:28px; font-weight:700; color:#1e293b; margin:0 0 8px 0;">データベース管理</h1>
+          <p style="color:#64748b; margin:0; font-size:16px;">会社・営業所データの確認と編集ができます</p>
+        </div>
+      <div class="toolbar" style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+        <button id="db-edit" style="padding:12px 20px; border:2px solid #3b82f6; border-radius:10px; background:#3b82f6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(59,130,246,0.3);">📝 編集開始</button>
+        <button id="db-add" style="padding:12px 20px; border:2px solid #10b981; border-radius:10px; background:#10b981; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(16,185,129,0.3);">➕ 行を追加</button>
+        <button id="db-del" style="padding:12px 20px; border:2px solid #ef4444; border-radius:10px; background:#ef4444; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(239,68,68,0.3);">🗑️ 選択行を削除</button>
+        <button id="db-save" style="padding:12px 20px; border:2px solid #8b5cf6; border-radius:10px; background:#8b5cf6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(139,92,246,0.3);">💾 保存</button>
+        <a id="db-download" style="padding:12px 20px; border:2px solid #f59e0b; border-radius:10px; background:#f59e0b; color:#ffffff; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(245,158,11,0.3); text-decoration:none; display:inline-block;" href="/db/csv">📊 CSV</a>
+        <span id="db-msg" style="margin-left:12px; color:#64748b; font-weight:500;"></span>
+      </div>
+        <div id="dbWrap" class="db-wrap">
+          <table id="db-table"></table>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <script>
-// === per-file meta ===
-window._incMeta = window._incMeta || [];
-window._decMeta = window._decMeta || [];
-function _currentCarType(){
-  const r = document.querySelector('input[name="car_type"]:checked');
-  return r ? r.value : "普通";
+
+// 実行成功後にアップロード選択を初期化（成功時のみ）
+function _clearFileInput(input){
+  try{ input.value = ""; }
+  catch(e){ const dt = new DataTransfer(); input.files = dt.files; }
 }
-function _currentWeight(zone){
-  const incSel = document.getElementById('incWeight');
-  const decHid = document.getElementById('decWeightHidden');
-  if(zone==='inc' && incSel) return incSel.value || 'to_2t';
-  if(zone==='dec' && decHid) return decHid.value || (incSel?.value || 'to_2t');
-  return 'to_2t';
-}
-function _getMetaList(zone){ return (zone==='inc') ? window._incMeta : window._decMeta; }
-function _getStore(zone){ return (zone==='inc') ? window._incStore : window._decStore; }
-function _ensureMetaLength(zone){
-  const store=_getStore(zone), meta=_getMetaList(zone);
-  while(meta.length < store.length){
-    const f = store[meta.length] || {};
-    meta.push({ name: f.name||'', size: f.size||0, car_type:_currentCarType(), weight_class:_currentWeight(zone) });
+function resetUploadsAfterSuccess(){
+  if (window._incStore) _incStore.length = 0;
+  if (window._decStore) _decStore.length = 0;
+  const incInput = document.getElementById('incInput');
+  const decInput = document.getElementById('decInput');
+  const incList  = document.getElementById('incList');
+  const decList  = document.getElementById('decList');
+  const incCount = document.getElementById('incCount');
+  const decCount = document.getElementById('decCount');
+  if (incInput) _clearFileInput(incInput);
+  if (decInput) _clearFileInput(decInput);
+  if (typeof _syncAll === 'function'){
+    _syncAll(incInput, _incStore, incList, incCount);
+    _syncAll(decInput, _decStore, decList, decCount);
   }
-  if(meta.length > store.length){ meta.splice(store.length); }
+}
+
+
+// --- header/record key resolver (handles spaces/dots/full-width) ---
+function _normHeader(s){
+  return String(s||'').replace(/[\u3000\s\.]/g,'').replace(/・/g,'');
+}
+function _buildKeyResolver(headers, records){
+  const allKeys = new Set();
+  (records||[]).forEach(r=>{ if(r) Object.keys(r).forEach(k=>allKeys.add(k)); });
+  const keys = Array.from(allKeys);
+  const res = {};
+  headers.forEach(h=>{
+    let use = h;
+    if(!(records?.[0]||{})[h]){
+      const nh = _normHeader(h);
+      for(const k of keys){
+        if(_normHeader(k) === nh){ use = k; break; }
+      }
+    }
+    res[h] = use;
+  });
+  return res;
+}
+
+
+// ======== Multiple file stores & UI sync (non-breaking) ========
+const _incStore = [];
+const _decStore = [];
+
+function _filesEqual(a,b){ return a.name===b.name && a.size===b.size && a.lastModified===b.lastModified; }
+
+function _mergeFiles(store, files){
+  const arr = Array.from(files||[]);
+  arr.forEach(f=>{
+    if(!store.some(x=>_filesEqual(x,f))) store.push(f);
+  });
+}
+
+function _setInputFromStore(input, store){
+  const dt = new DataTransfer();
+  store.forEach(f=>dt.items.add(f));
+  input.files = dt.files;
+}
+
+function renderFileListFromStore(listEl, store){
+  if(!listEl) return;
+  listEl.innerHTML = '';
+  const icon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h7l5 5v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#059669"/><path d="M14 2v5h5" fill="#10b981"/></svg>`;
+  store.forEach((f,idx)=>{
+    const div = document.createElement('div');
+    div.className = 'filechip';
+    const size = formatFileSize(f.size);
+    div.innerHTML = `<span class="name" title="${f.name}">${f.name}</span>` + `<span class="size">${size}</span>` + `<button class="del" data-idx="${idx}" aria-label="削除">×</button>` + icon;
+    listEl.appendChild(div);
+  });
+}
+
+function _syncAll(input, store, listEl, countEl){
+  _setInputFromStore(input, store);
+  fileCountBadge(input, countEl);
+  renderFileListFromStore(listEl, store);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const incInput = document.getElementById('increase_files') || document.getElementById('incInput');
+  const decInput = document.getElementById('decrease_files') || document.getElementById('decInput');
+  const incList  = document.getElementById('incList');
+  const decList  = document.getElementById('decList');
+  const incCount = document.getElementById('incCount');
+  const decCount = document.getElementById('decCount');
+
+  // 追加ボタン → 既存inputを開いて追加
+  const incAdd = document.getElementById('incAddBtn');
+  const decAdd = document.getElementById('decAddBtn');
+  if(incAdd && incInput){ incAdd.addEventListener('click', ()=> incInput.click()); }
+  if(decAdd && decInput){ decAdd.addEventListener('click', ()=> decInput.click()); }
+
+  // 既存 change を拡張：新規選択を store にマージ
+  if(incInput){
+    incInput.addEventListener('change', (e)=>{
+      _mergeFiles(_incStore, e.target.files);
+      _syncAll(incInput, _incStore, incList, incCount);
+    });
+  }
+  if(decInput){
+    decInput.addEventListener('change', (e)=>{
+      _mergeFiles(_decStore, e.target.files);
+      _syncAll(decInput, _decStore, decList, decCount);
+    });
+  }
+
+  // チップの×で削除（イベント委譲）
+  if(incList){
+    incList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.del');
+      if(!btn) return;
+      const idx = +btn.dataset.idx;
+      if(Number.isInteger(idx)){
+        _incStore.splice(idx,1);
+        _syncAll(incInput, _incStore, incList, incCount);
+      }
+    });
+  }
+  if(decList){
+    decList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.del');
+      if(!btn) return;
+      const idx = +btn.dataset.idx;
+      if(Number.isInteger(idx)){
+        _decStore.splice(idx,1);
+        _syncAll(decInput, _decStore, decList, decCount);
+      }
+    });
+  }
+
+  // すでにある wireDrop() は input に files をセットして change を発火するので、
+  // ここでの change ハンドラが store にマージし、UIと件数を更新します（互換維持）。
+});
+// ===============================================================
+
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function renderFileList(inputEl, listEl){
+  if(!listEl) return;
+  listEl.innerHTML = '';
+  const files = Array.from(inputEl.files || []);
+  if(files.length === 0){ return; }
+  const icon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h7l5 5v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#059669"/><path d="M14 2v5h5" fill="#10b981"/></svg>`;
+  files.forEach(f=>{
+    const div = document.createElement('div');
+    div.className = 'filechip';
+    const size = formatFileSize(f.size);
+    div.innerHTML = `<span class="name" title="${f.name}">${f.name}</span>` + `<span class="size">${size}</span>` + icon;
+    listEl.appendChild(div);
+  });
 }
 
 function wireDrop(zoneId, inputId){
@@ -146,22 +383,22 @@ function fileCountBadge(input, badgeEl){
 }
 wireDrop('incZone', 'incInput');
 wireDrop('decZone', 'decInput');
-document.getElementById('incInput').addEventListener('change', e=>fileCountBadge(e.target, document.getElementById('incCount')));
-document.getElementById('decInput').addEventListener('change', e=>fileCountBadge(e.target, document.getElementById('decCount')));
+// handled by enhanced change handler
+// handled by enhanced change handler
 
 const tabInput = document.getElementById('tab-input');
 const tabDb = document.getElementById('tab-db');
-const panelInput = document.getElementById('panel-input');
-const panelDb = document.getElementById('panel-db');
+const inputContent = document.getElementById('input-content');
+const dbContent = document.getElementById('db-content');
 
 tabInput.addEventListener('click', ()=>{
   tabInput.classList.add('active'); tabDb.classList.remove('active');
-  panelInput.classList.remove('hidden'); panelDb.classList.add('hidden');
+  inputContent.style.display = 'block'; dbContent.style.display = 'none';
 });
 
 tabDb.addEventListener('click', async ()=>{
   tabDb.classList.add('active'); tabInput.classList.remove('active');
-  panelDb.classList.remove('hidden'); panelInput.classList.add('hidden');
+  dbContent.style.display = 'block'; inputContent.style.display = 'none';
   resizeDB(); await loadDB();
 });
 
@@ -195,9 +432,10 @@ async function loadDB(){
 function renderTable(){
   const tbl = document.getElementById('db-table');
   const thead = `<thead><tr>${DB.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`;
+  const keyMap = _buildKeyResolver(DB.headers, DB.records);
   const tbody = `<tbody>${
     DB.records.map((r, idx)=>{
-      const row = Array.isArray(r) ? r : DB.headers.map(h => (r?.[h] ?? ""));
+      const row = Array.isArray(r) ? r : DB.headers.map(h => (r?.[keyMap[h]] ?? ""));
       return `<tr data-idx="${idx}">` + row.map((c,i)=>{
         const h = DB.headers[i] || '';
         const ce = editable ? 'contenteditable="true"' : '';
@@ -262,8 +500,6 @@ async function isZip(file){
 
 runBtn.addEventListener('click', async ()=>{
 
-  document.getElementById('inc_meta').value = JSON.stringify(window._incMeta||[]);
-  document.getElementById('dec_meta').value = JSON.stringify(window._decMeta||[]);
   const fd = new FormData(form);
   const inc = document.getElementById('incInput'); const dec = document.getElementById('decInput');
   // .xlsx quick validation to prevent non-Excel uploads
@@ -271,7 +507,8 @@ runBtn.addEventListener('click', async ()=>{
     if(!(await isZip(f))){ upStatus.textContent = '失敗: Excel(.xlsx)以外の可能性があります。'; return; }
   }
   // 既存nameに追加（hiddenがあるため保険的にappend）
-  // 重複append削除：FormData(form)に既に含まれるためappendしない
+  for(const f of inc.files) fd.append('increase_files', f);
+  for(const f of dec.files) fd.append('decrease_files', f);
 
   runBtn.disabled = true;
   upStatus.innerHTML = '<span class="spinner"></span><span class="progress" id="prog">アップロード中…</span>';
@@ -285,6 +522,7 @@ runBtn.addEventListener('click', async ()=>{
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = fname;
     document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    resetUploadsAfterSuccess();
     upStatus.textContent = 'アップロードが完了しました。ファイルをダウンロードしました。';
   }catch(e){
     upStatus.textContent = '失敗: ' + e.message;
@@ -320,7 +558,14 @@ function xhrPostWithProgress(url, formData, onProgress){
   });
 }
 
+document.addEventListener('DOMContentLoaded', ()=>{
+  const incWeight = document.getElementById('incWeight');
+  const decHidden = document.getElementById('decWeightHidden');
+  if(incWeight && decHidden){
+    const sync = ()=>{ decHidden.value = incWeight.value; };
+    incWeight.addEventListener('change', sync);
+    sync();
+  }
+});
 
-document.getElementById('incInput')?.addEventListener('change', ()=>{ _ensureMetaLength('inc'); });
-document.getElementById('decInput')?.addEventListener('change', ()=>{ _ensureMetaLength('dec'); });
 </script>
