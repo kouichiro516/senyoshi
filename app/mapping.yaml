@@ -1,0 +1,17 @@
+increase:
+  user_name: "I7"
+  office_name: "AH7"
+  era: "R19"
+  year: "U19"
+  capacity: "U23"
+
+decrease:
+  user_name: "I7"
+  office_name: "AH7"
+  era: "AM19"
+  year: "AQ19"
+  capacity: "AQ23"
+
+output:
+  sheet_index: 0
+  start_row: 21

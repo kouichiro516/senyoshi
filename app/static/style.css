@@ -1,0 +1,6 @@
+body { font-family: system-ui, sans-serif; margin: 0; color: #222; }
+.container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+h1 { font-size: 20px; margin-bottom: 16px; }
+fieldset { margin: 16px 0; padding: 12px; border: 1px solid #ddd; }
+button { padding: 10px 16px; cursor: pointer; }
+.hint { color: #666; font-size: 12px; }

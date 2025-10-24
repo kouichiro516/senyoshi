@@ -1,0 +1,326 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>届出作成</title>
+<style>
+  :root{
+    --zone-hover-bg: #fff7cc;    /* 目立つ薄い黄色 */
+    --zone-hover-bd: #ffb300;    /* 濃いめの黄オレンジ */
+    --zone-hover-shadow: rgba(255,179,0,0.25);
+    --accent: #0b70ff;
+  }
+  html, body { height: 100%; }
+  body{font-family:system-ui,Meiryo,Segoe UI,sans-serif; margin:0; padding:24px; box-sizing:border-box;}
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tab{padding:8px 12px;border:1px solid #bbb;border-radius:8px;cursor:pointer;user-select:none}
+  .tab.active{background:#eef}
+  .hidden{display:none}
+  .grid{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+  .zone{flex:1 1 360px;border:2px dashed #999;border-radius:12px;padding:16px;cursor:pointer;min-height:110px;transition:background-color .15s, border-color .15s, box-shadow .15s}
+  .zone:hover,.zone.active{background:var(--zone-hover-bg); border-color:var(--zone-hover-bd); box-shadow:0 0 0 3px var(--zone-hover-shadow) inset}
+  .hint{color:#666;font-size:12px;margin-top:6px}
+  .radios label{margin-right:10px}
+  .toolbar{display:flex; gap:8px; margin:8px 0}
+  .btn{padding:10px 14px; border:1px solid #bbb; border-radius:10px; background:#fff; cursor:pointer}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  .btn[disabled]{opacity:.55; cursor:not-allowed}
+  td[contenteditable="true"]{background:#fffbe6}
+  tr.selected{outline:2px solid #2ecc71}
+  table{border-collapse:collapse; min-width:900px}
+  th, td{border:1px solid #ddd; padding:6px 8px; white-space:nowrap; font-size:13px}
+  /* DB全画面高さ用のラッパ */
+  .db-wrap{overflow:auto; border:1px solid #eee; border-radius:8px; padding:8px; margin-top:8px; height: 50vh;} /* 初期値。JSでリサイズ */
+  /* ステータス/スピナー */
+  .status{margin-left:10px; color:#555}
+  .spinner{display:inline-block; width:1em; height:1em; border:2px solid #999; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-2px; margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .progress{display:inline-block; min-width:80px}
+
+/* per-file settings UI (gear panel) */
+.filechip{position:relative}
+.filechip .gear{
+  position:absolute; left:-6px; top:-6px; width:16px; height:16px; line-height:14px;
+  text-align:center; font-size:12px; border:1px solid #d0d7de; border-radius:50%;
+  background:#fff; color:#0366d6; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.filecfg{
+  position:absolute; z-index:20; top:42px; left:0; min-width:240px;
+  background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.filecfg h4{margin:0 0 6px; font-size:12px; color:#555; max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.filecfg .row{display:flex; align-items:center; gap:8px; margin:6px 0}
+.filecfg .row label{font-size:12px; color:#333; white-space:nowrap}
+.filecfg .row select{font-size:12px}
+.filecfg .actions{display:flex; gap:8px; justify-content:flex-end; margin-top:8px}
+.filecfg .actions button{font-size:12px; padding:4px 10px}
+</style>
+
+<div class="tabs">
+  <div id="tab-input" class="tab active">作成</div>
+  <div id="tab-db" class="tab">DB</div>
+</div>
+
+<section id="panel-input">
+  <form id="makeForm" enctype="multipart/form-data" onsubmit="return false;">
+    <div class="grid">
+      <div class="zone" id="incZone" tabindex="0">
+        <b>① 連絡書（増車）</b><br>
+        <label for="incInput" style="display:inline-block;margin-top:6px">ここをクリック / ファイルをドロップ</label>
+        <input id="incInput" type="file" name="increase_files" multiple accept=".xlsx" hidden>
+        <div class="hint">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="incCount" class="hint"></span></div>
+      </div>
+      <div class="zone" id="decZone" tabindex="0">
+        <b>② 連絡書（減車）</b><br>
+        <label for="decInput" style="display:inline-block;margin-top:6px">ここをクリック / ファイルをドロップ</label>
+        <input id="decInput" type="file" name="decrease_files" multiple accept=".xlsx" hidden>
+        <div class="hint">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="decCount" class="hint"></span></div>
+      </div>
+    </div>
+    <div style="margin-top:14px"><b>③ 種別（保存のみ）</b></div>
+    <div class="radios">
+      <label><input type="radio" name="car_type" value="普通" checked>普通</label>
+      <label><input type="radio" name="car_type" value="小型">小型</label>
+      <label><input type="radio" name="car_type" value="けん引">けん引</label>
+      <label><input type="radio" name="car_type" value="被けん引">被けん引</label>
+    </div>
+    <div style="margin-top:16px">
+      <button id="runBtn" class="btn primary">作成してダウンロード</button>
+      <span id="upStatus" class="status"></span>
+    </div>
+    <input type="hidden" id="inc_meta" name="inc_meta">
+  <input type="hidden" id="dec_meta" name="dec_meta">
+</form>
+</section>
+
+<section id="panel-db" class="hidden">
+  <div class="toolbar">
+    <button id="db-edit" class="btn">編集開始</button>
+    <button id="db-add" class="btn">行を追加</button>
+    <button id="db-del" class="btn">選択行を削除</button>
+    <button id="db-save" class="btn">保存</button>
+    <a id="db-download" class="btn" href="/db/csv">CSV</a>
+    <span id="db-msg" style="margin-left:8px;color:#666"></span>
+  </div>
+  <div id="dbWrap" class="db-wrap">
+    <table id="db-table"></table>
+  </div>
+</section>
+
+<script>
+// === per-file meta ===
+window._incMeta = window._incMeta || [];
+window._decMeta = window._decMeta || [];
+function _currentCarType(){
+  const r = document.querySelector('input[name="car_type"]:checked');
+  return r ? r.value : "普通";
+}
+function _currentWeight(zone){
+  const incSel = document.getElementById('incWeight');
+  const decHid = document.getElementById('decWeightHidden');
+  if(zone==='inc' && incSel) return incSel.value || 'to_2t';
+  if(zone==='dec' && decHid) return decHid.value || (incSel?.value || 'to_2t');
+  return 'to_2t';
+}
+function _getMetaList(zone){ return (zone==='inc') ? window._incMeta : window._decMeta; }
+function _getStore(zone){ return (zone==='inc') ? window._incStore : window._decStore; }
+function _ensureMetaLength(zone){
+  const store=_getStore(zone), meta=_getMetaList(zone);
+  while(meta.length < store.length){
+    const f = store[meta.length] || {};
+    meta.push({ name: f.name||'', size: f.size||0, car_type:_currentCarType(), weight_class:_currentWeight(zone) });
+  }
+  if(meta.length > store.length){ meta.splice(store.length); }
+}
+
+function wireDrop(zoneId, inputId){
+  const zone = document.getElementById(zoneId);
+  const input = document.getElementById(inputId);
+  zone.addEventListener('click', ()=> input.click());
+  zone.addEventListener('focus', ()=> zone.classList.add('active'));
+  zone.addEventListener('blur',  ()=> zone.classList.remove('active'));
+  ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev, e=>{e.preventDefault(); zone.classList.add('active');}));
+  ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev, e=>{e.preventDefault(); zone.classList.remove('active');}));
+  zone.addEventListener('drop', e=>{ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); });
+}
+function fileCountBadge(input, badgeEl){
+  const n = input.files?.length || 0;
+  badgeEl.textContent = n ? `（${n}件選択）` : '';
+}
+wireDrop('incZone', 'incInput');
+wireDrop('decZone', 'decInput');
+document.getElementById('incInput').addEventListener('change', e=>fileCountBadge(e.target, document.getElementById('incCount')));
+document.getElementById('decInput').addEventListener('change', e=>fileCountBadge(e.target, document.getElementById('decCount')));
+
+const tabInput = document.getElementById('tab-input');
+const tabDb = document.getElementById('tab-db');
+const panelInput = document.getElementById('panel-input');
+const panelDb = document.getElementById('panel-db');
+
+tabInput.addEventListener('click', ()=>{
+  tabInput.classList.add('active'); tabDb.classList.remove('active');
+  panelInput.classList.remove('hidden'); panelDb.classList.add('hidden');
+});
+
+tabDb.addEventListener('click', async ()=>{
+  tabDb.classList.add('active'); tabInput.classList.remove('active');
+  panelDb.classList.remove('hidden'); panelInput.classList.add('hidden');
+  resizeDB(); await loadDB();
+});
+
+function resizeDB(){
+  const wrap = document.getElementById('dbWrap');
+  const top = wrap.getBoundingClientRect().top + window.scrollY;
+  const paddingBottom = 24;
+  const h = Math.max(300, window.innerHeight - (top - window.scrollY) - paddingBottom);
+  wrap.style.height = h + 'px';
+}
+window.addEventListener('resize', resizeDB);
+
+let DB = {headers:[], records:[]};
+let editable = false;
+let selectedRow = null;
+
+async function loadDB(){
+  document.getElementById('db-msg').textContent = '読み込み中…';
+  try{
+    const res = await fetch('/db', {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const flat = await res.json();
+    DB = {headers: flat.headers || [], records: flat.records || []};
+    renderTable();
+    document.getElementById('db-msg').textContent = `ヘッダ${DB.headers.length} / 行${DB.records.length}`;
+  }catch(e){
+    document.getElementById('db-msg').textContent = '取得失敗: ' + e.message;
+  }
+}
+
+function renderTable(){
+  const tbl = document.getElementById('db-table');
+  const thead = `<thead><tr>${DB.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${
+    DB.records.map((r, idx)=>{
+      const row = Array.isArray(r) ? r : DB.headers.map(h => (r?.[h] ?? ""));
+      return `<tr data-idx="${idx}">` + row.map((c,i)=>{
+        const h = DB.headers[i] || '';
+        const ce = editable ? 'contenteditable="true"' : '';
+        return `<td ${ce} data-col="${h}">${c ?? ''}</td>`;
+      }).join('') + `</tr>`;
+    }).join('')
+  }</tbody>`;
+  tbl.innerHTML = thead + tbody;
+  tbl.querySelectorAll('tbody tr').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      if(selectedRow) selectedRow.classList.remove('selected');
+      selectedRow = tr; tr.classList.add('selected');
+    });
+  });
+}
+
+document.getElementById('db-edit').addEventListener('click', ()=>{
+  editable = !editable;
+  renderTable();
+  document.getElementById('db-msg').textContent = editable ? '編集モード' : '閲覧モード';
+});
+document.getElementById('db-add').addEventListener('click', ()=>{
+  if(!editable){ alert('編集開始を押してください'); return; }
+  const empty = Object.fromEntries(DB.headers.map(h=>[h,'']));
+  DB.records.push(empty); renderTable();
+});
+document.getElementById('db-del').addEventListener('click', ()=>{
+  if(!editable){ alert('編集開始を押してください'); return; }
+  if(!selectedRow){ alert('削除する行を選択してください'); return; }
+  if(!confirm('選択行を削除します。よろしいですか？')) return;
+  const idx = parseInt(selectedRow.dataset.idx, 10);
+  DB.records.splice(idx, 1); selectedRow = null; renderTable();
+});
+document.getElementById('db-save').addEventListener('click', async ()=>{
+  if(!editable){ alert('編集開始を押してください'); return; }
+  const rows = Array.from(document.querySelectorAll('#db-table tbody tr'));
+  DB.records = rows.map(tr=>{
+    const tds = Array.from(tr.querySelectorAll('td'));
+    const obj = {}; tds.forEach(td=> obj[td.dataset.col] = td.textContent); return obj;
+  });
+  try{
+    const res = await fetch('/db/save', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(DB)});
+    if(!res.ok){ throw new Error(await res.text()); }
+    document.getElementById('db-msg').textContent = '保存しました';
+    editable = false; await loadDB();
+  }catch(e){
+    alert('保存に失敗: ' + e.message);
+  }
+});
+
+// XHRでアップロード進捗を表示しつつPOST→応答Blobを保存
+const runBtn = document.getElementById('runBtn');
+const upStatus = document.getElementById('upStatus');
+const form = document.getElementById('makeForm');
+
+// ZIP signature quick check for .xlsx
+async function isZip(file){
+  const buf = await file.slice(0,4).arrayBuffer();
+  const u = new Uint8Array(buf);
+  return u[0]===0x50 && u[1]===0x4B && u[2]===0x03 && u[3]===0x04; // 'PK\x03\x04'
+}
+
+runBtn.addEventListener('click', async ()=>{
+
+  document.getElementById('inc_meta').value = JSON.stringify(window._incMeta||[]);
+  document.getElementById('dec_meta').value = JSON.stringify(window._decMeta||[]);
+  const fd = new FormData(form);
+  const inc = document.getElementById('incInput'); const dec = document.getElementById('decInput');
+  // .xlsx quick validation to prevent non-Excel uploads
+  for(const f of [...inc.files, ...dec.files]){
+    if(!(await isZip(f))){ upStatus.textContent = '失敗: Excel(.xlsx)以外の可能性があります。'; return; }
+  }
+  // 既存nameに追加（hiddenがあるため保険的にappend）
+  // 重複append削除：FormData(form)に既に含まれるためappendしない
+
+  runBtn.disabled = true;
+  upStatus.innerHTML = '<span class="spinner"></span><span class="progress" id="prog">アップロード中…</span>';
+
+  try{
+    const blob = await xhrPostWithProgress('/process', fd, (percent)=>{
+      const p = document.getElementById('prog');
+      p.textContent = `アップロード中… ${percent}%`;
+    });
+    const fname = '事業計画変更届出.xlsx';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    upStatus.textContent = 'アップロードが完了しました。ファイルをダウンロードしました。';
+  }catch(e){
+    upStatus.textContent = '失敗: ' + e.message;
+  }finally{
+    runBtn.disabled = false;
+    document.getElementById('incInput').dispatchEvent(new Event('change'));
+    document.getElementById('decInput').dispatchEvent(new Event('change'));
+  }
+});
+
+function xhrPostWithProgress(url, formData, onProgress){
+  return new Promise((resolve, reject)=>{
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.responseType = 'blob';
+    xhr.upload.onprogress = (e)=>{
+      if(e.lengthComputable && typeof onProgress === 'function'){
+        const percent = Math.min(99, Math.round(e.loaded / e.total * 100));
+        onProgress(percent);
+      }
+    };
+    xhr.onload = ()=>{
+      if(xhr.status >= 200 && xhr.status < 300){
+        resolve(xhr.response);
+      }else{
+        const reader = new FileReader();
+        reader.onload = ()=> reject(new Error(reader.result || ('HTTP '+xhr.status)));
+        reader.readAsText(xhr.response);
+      }
+    };
+    xhr.onerror = ()=> reject(new Error('ネットワークエラー'));
+    xhr.send(formData);
+  });
+}
+
+
+document.getElementById('incInput')?.addEventListener('change', ()=>{ _ensureMetaLength('inc'); });
+document.getElementById('decInput')?.addEventListener('change', ()=>{ _ensureMetaLength('dec'); });
+</script>
