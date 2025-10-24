@@ -45,8 +45,31 @@
   .filechip .size{font-size:12px; color:#718096; font-weight:500;}
   .filechip .del{cursor:pointer; border:none; background:#fee2e2; color:#dc2626; font-size:12px; line-height:1; padding:6px 8px; border-radius:8px; transition:all 0.2s ease; font-weight:600;}
   .filechip .del:hover{background:#fecaca; transform:scale(1.05);}
-  .addbtn{padding:12px 16px; border:2px dashed #cbd5e0; background:transparent; border-radius:12px; cursor:pointer; color:#4a5568; font-size:14px; font-weight:600; transition:all 0.2s ease; text-align:center;}
-  .addbtn:hover{border-color:#667eea; color:#667eea; background:#f7fafc;}
+  /* ファイル選択画面用のスタイル */
+  .file-selection-chip{display:flex; flex-direction:column; gap:12px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; background:#ffffff; transition:all 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:16px;}
+  .file-selection-chip:hover{border-color:#667eea; background:#f8fafc; transform:translateY(-1px); box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+  .file-selection-chip .file-header{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+  .file-selection-chip .file-options{display:flex; flex-direction:column; gap:12px;}
+  .file-selection-chip .option-row{display:flex; flex-direction:column; gap:6px;}
+  .file-selection-chip .option-label{font-size:14px; font-weight:600; color:#374151;}
+  .file-selection-chip .option-controls{display:flex; gap:8px;}
+  .file-selection-chip .radio-group{display:flex; gap:8px; flex-wrap:wrap;}
+  .file-selection-chip .radio-item{display:flex; align-items:center; gap:6px;}
+  .file-selection-chip .radio-item input[type="radio"]{accent-color:#667eea;}
+  .file-selection-chip .radio-item label{font-size:14px; font-weight:500; color:#4b5563; cursor:pointer;}
+  .file-selection-chip select{width:100%; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#ffffff;}
+  /* モーダル用スタイル */
+  .modal-file-item{margin-bottom:24px; padding:20px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc;}
+  .modal-file-item .file-info{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
+  .modal-file-item .file-name{font-size:16px; font-weight:600; color:#1e293b;}
+  .modal-file-item .file-size{font-size:14px; color:#64748b;}
+  .modal-file-item .question-section{margin-bottom:16px;}
+  .modal-file-item .question-label{font-size:14px; font-weight:600; color:#374151; margin-bottom:8px; display:block;}
+  .modal-file-item .radio-group{display:flex; gap:12px; flex-wrap:wrap;}
+  .modal-file-item .radio-item{display:flex; align-items:center; gap:6px;}
+  .modal-file-item .radio-item input[type="radio"]{accent-color:#667eea;}
+  .modal-file-item .radio-item label{font-size:14px; font-weight:500; color:#4b5563; cursor:pointer;}
+  .modal-file-item select{width:100%; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#ffffff;}
   .radio-label:hover{border-color:#667eea; background:#f8fafc; transform:translateY(-1px); box-shadow:0 4px 6px rgba(0,0,0,0.1);}
   .radio-label:has(input:checked){border-color:#667eea; background:linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%); box-shadow:0 4px 6px rgba(102,126,234,0.2);}
   select:hover{border-color:#667eea; box-shadow:0 4px 6px rgba(0,0,0,0.1);}
@@ -55,7 +78,7 @@
 <section id="panel-input">
   <div style="width:100%; padding:0 24px; margin-top:0;">
     <div style="background:#ffffff; border-radius:16px; padding:32px; box-shadow:0 4px 6px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
-      <div class="tabs" style="margin-bottom:32px;">
+      <div class="tabs" style="margin-bottom:16px;">
         <div id="tab-input" class="tab active">📝 作成</div>
         <div id="tab-db" class="tab">🗃️ データベース</div>
       </div>
@@ -88,11 +111,10 @@
           <p style="color:#64748b; font-size:14px; margin:0;">ここをクリック / ファイルをドロップ</p>
         </div>
         <input id="incInput" type="file" name="increase_files" multiple accept=".xlsx" hidden>
-        <label for="incInput" style="display:block; width:100%; height:100%; position:absolute; top:0; left:0; cursor:pointer;"></label>
-        <div style="position:absolute; bottom:16px; left:16px; right:16px;">
-          <div style="font-size:12px; color:#718096; text-align:center; margin-bottom:12px;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="incCount" style="font-weight:600; color:#667eea;"></span></div>
-          <div id="incList" class="filelist" aria-live="polite"></div>
-          <button type="button" id="incAddBtn" class="addbtn">+ ファイルを追加</button>
+        <label for="incInput" style="display:block; position:absolute; top:0; left:0; right:0; height:120px; cursor:pointer; z-index:1;"></label>
+        <div style="margin-top:16px;">
+          <div id="incList" class="filelist" aria-live="polite" style="margin-bottom:12px;"></div>
+          <div style="font-size:12px; color:#718096; text-align:center;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="incCount" style="font-weight:600; color:#667eea;"></span></div>
         </div>
       </div>
       <div class="zone" id="decZone" tabindex="0">
@@ -108,56 +130,26 @@
           <p style="color:#64748b; font-size:14px; margin:0;">ここをクリック / ファイルをドロップ</p>
         </div>
         <input id="decInput" type="file" name="decrease_files" multiple accept=".xlsx" hidden>
-        <label for="decInput" style="display:block; width:100%; height:100%; position:absolute; top:0; left:0; cursor:pointer;"></label>
-        <div style="position:absolute; bottom:16px; left:16px; right:16px;">
-          <div style="font-size:12px; color:#718096; text-align:center; margin-bottom:12px;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="decCount" style="font-weight:600; color:#667eea;"></span></div>
-          <div id="decList" class="filelist" aria-live="polite"></div>
-          <button type="button" id="decAddBtn" class="addbtn">+ ファイルを追加</button>
+        <label for="decInput" style="display:block; position:absolute; top:0; left:0; right:0; height:120px; cursor:pointer; z-index:1;"></label>
+        <div style="margin-top:16px;">
+          <div id="decList" class="filelist" aria-live="polite" style="margin-bottom:12px;"></div>
+          <div style="font-size:12px; color:#718096; text-align:center;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="decCount" style="font-weight:600; color:#667eea;"></span></div>
         </div>
-      </div>
-    </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;">
-      <div style="background:#ffffff; border-radius:12px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
-        <h3 style="font-size:16px; font-weight:600; color:#1e293b; margin:0 0 16px 0; display:flex; align-items:center; gap:8px;">
-          <span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:#3b82f6; color:white; border-radius:4px; font-size:11px; font-weight:700;">3</span>
-          種別（保存のみ）
-        </h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
-            <input type="radio" name="car_type" value="普通" checked style="accent-color:#667eea;">
-            <span style="font-weight:600; color:#1a202c;">普通</span>
-          </label>
-          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
-            <input type="radio" name="car_type" value="小型" style="accent-color:#667eea;">
-            <span style="font-weight:600; color:#1a202c;">小型</span>
-          </label>
-          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
-            <input type="radio" name="car_type" value="けん引" style="accent-color:#667eea;">
-            <span style="font-weight:600; color:#1a202c;">けん引</span>
-          </label>
-          <label class="radio-label" style="display:flex; align-items:center; gap:8px; padding:12px; border:2px solid #e2e8f0; border-radius:12px; cursor:pointer; transition:all 0.2s ease; background:#ffffff;">
-            <input type="radio" name="car_type" value="被けん引" style="accent-color:#667eea;">
-            <span style="font-weight:600; color:#1a202c;">被けん引</span>
-          </label>
-        </div>
-      </div>
-      <div style="background:#ffffff; border-radius:12px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
-        <h3 style="font-size:16px; font-weight:600; color:#1e293b; margin:0 0 16px 0; display:flex; align-items:center; gap:8px;">
-          <span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:#3b82f6; color:white; border-radius:4px; font-size:11px; font-weight:700;">4</span>
-          積載トン数
-        </h3>
-        <select id="incWeight" name="inc_weight_class" style="width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; font-weight:600; color:#1a202c; background:#ffffff; transition:all 0.2s ease;">
-          <option value="to_2t">2.0トンまで</option>
-          <option value="2t_long">2.0トンロング</option>
-          <option value="over_2t_long_to_7_5t">2.0トンロング超～7.5トンまで</option>
-          <option value="over_7_5t">7.5トンを超えるもの</option>
-        </select>
-        <input type="hidden" id="decWeightHidden" name="dec_weight_class" value="to_2t">
       </div>
     </div>
 
     <div style="margin-top:32px; text-align:center;">
-      <button id="runBtn" style="background:#3b82f6; color:white; border:none; padding:16px 32px; font-size:16px; font-weight:600; border-radius:12px; cursor:pointer; transition:all 0.2s ease; box-shadow:0 4px 12px rgba(59,130,246,0.3);">
+      <button id="answerQuestionsBtn" style="background:#f59e0b; color:white; border:none; padding:16px 32px; font-size:16px; font-weight:600; border-radius:12px; cursor:pointer; transition:all 0.2s ease; box-shadow:0 4px 12px rgba(245,158,11,0.3); margin-right:16px;">
+        <span style="display:flex; align-items:center; justify-content:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          質問に答える
+        </span>
+      </button>
+      <button id="runBtn" disabled style="background:#94a3b8; color:white; border:none; padding:16px 32px; font-size:16px; font-weight:600; border-radius:12px; cursor:not-allowed; transition:all 0.2s ease; box-shadow:0 4px 12px rgba(148,163,184,0.3);">
         <span style="display:flex; align-items:center; justify-content:center; gap:8px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -184,21 +176,48 @@
           <h1 style="font-size:28px; font-weight:700; color:#1e293b; margin:0 0 8px 0;">データベース管理</h1>
           <p style="color:#64748b; margin:0; font-size:16px;">会社・営業所データの確認と編集ができます</p>
         </div>
-      <div class="toolbar" style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
-        <button id="db-edit" style="padding:12px 20px; border:2px solid #3b82f6; border-radius:10px; background:#3b82f6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(59,130,246,0.3);">📝 編集開始</button>
-        <button id="db-add" style="padding:12px 20px; border:2px solid #10b981; border-radius:10px; background:#10b981; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(16,185,129,0.3);">➕ 行を追加</button>
-        <button id="db-del" style="padding:12px 20px; border:2px solid #ef4444; border-radius:10px; background:#ef4444; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(239,68,68,0.3);">🗑️ 選択行を削除</button>
-        <button id="db-save" style="padding:12px 20px; border:2px solid #8b5cf6; border-radius:10px; background:#8b5cf6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(139,92,246,0.3);">💾 保存</button>
-        <a id="db-download" style="padding:12px 20px; border:2px solid #f59e0b; border-radius:10px; background:#f59e0b; color:#ffffff; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(245,158,11,0.3); text-decoration:none; display:inline-block;" href="/db/csv">📊 CSV</a>
-        <span id="db-msg" style="margin-left:12px; color:#64748b; font-weight:500;"></span>
-      </div>
-        <div id="dbWrap" class="db-wrap">
+        <div class="toolbar" style="position:sticky; top:0; background:#ffffff; z-index:10; padding:16px 0; margin-bottom:20px; border-bottom:1px solid #e2e8f0; display:flex; gap:12px; flex-wrap:wrap;">
+          <button id="db-edit" style="padding:12px 20px; border:2px solid #3b82f6; border-radius:10px; background:#3b82f6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(59,130,246,0.3);">📝 編集開始</button>
+          <button id="db-save" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">💾 保存</button>
+          <button id="db-add-above" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">➕ 選択行の上に行を追加</button>
+          <button id="db-add" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">➕ 行を一番下に追加</button>
+          <button id="db-del" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">🗑️ 選択行を削除</button>
+          <a id="db-download" style="padding:12px 20px; border:2px solid #f59e0b; border-radius:10px; background:#f59e0b; color:#ffffff; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(245,158,11,0.3); text-decoration:none; display:inline-block;" href="/db/csv">📊 CSV</a>
+          <span id="db-msg" style="margin-left:12px; color:#64748b; font-weight:500;"></span>
+        </div>
+        <div id="mode-indicator" style="text-align:center; margin-bottom:16px; font-size:20px; font-weight:700; color:#3b82f6; padding:12px; background:#f8fafc; border-radius:8px; border:2px solid #e2e8f0;">
+          閲覧モード
+        </div>
+        <div id="dbWrap" class="db-wrap" style="height:calc(100vh - 300px); overflow-y:auto;">
           <table id="db-table"></table>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- 質問モーダル -->
+<div id="questionModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); overflow-y:auto;">
+  <div class="modal-content" style="background-color:#ffffff; margin:2% auto; padding:32px; border-radius:16px; width:90%; max-width:700px; max-height:90vh; box-shadow:0 8px 32px rgba(0,0,0,0.2); overflow-y:auto;">
+    <div style="text-align:center; margin-bottom:32px;">
+      <h2 style="font-size:24px; font-weight:700; color:#1e293b; margin:0 0 8px 0;">ファイルの詳細を入力してください</h2>
+      <p style="color:#64748b; margin:0; font-size:16px;">アップロードされたファイルの種別と積載トン数を選択してください</p>
+    </div>
+    
+    <div id="modalFileList" style="margin-bottom:32px;">
+      <!-- ファイルリストがここに動的に生成される -->
+    </div>
+    
+    <div style="text-align:center;">
+      <button id="modalCancelBtn" style="background:#6b7280; color:white; border:none; padding:12px 24px; font-size:14px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s ease; margin-right:12px;">
+        キャンセル
+      </button>
+      <button id="modalConfirmBtn" style="background:#3b82f6; color:white; border:none; padding:12px 24px; font-size:14px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s ease;">
+        確定
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
 
@@ -268,23 +287,379 @@ function _setInputFromStore(input, store){
 }
 
 function renderFileListFromStore(listEl, store){
-  if(!listEl) return;
+  console.log('renderFileListFromStore呼び出し:', {
+    listEl: listEl ? listEl.id : 'null',
+    storeLength: store.length
+  });
+  if(!listEl) {
+    console.log('listElがnullです');
+    return;
+  }
   listEl.innerHTML = '';
-  const icon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h7l5 5v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#059669"/><path d="M14 2v5h5" fill="#10b981"/></svg>`;
   store.forEach((f,idx)=>{
+    console.log('ファイル追加:', f.name, 'インデックス:', idx);
     const div = document.createElement('div');
     div.className = 'filechip';
     const size = formatFileSize(f.size);
-    div.innerHTML = `<span class="name" title="${f.name}">${f.name}</span>` + `<span class="size">${size}</span>` + `<button class="del" data-idx="${idx}" aria-label="削除">×</button>` + icon;
+    div.innerHTML = `<button class="del" data-idx="${idx}" aria-label="削除" style="font-size:20px; padding:4px 8px; margin-right:8px;">×</button>` + `<span class="name" title="${f.name}">${f.name}</span>` + `<span class="size">${size}</span>`;
     listEl.appendChild(div);
   });
+  console.log('ファイルリスト更新完了:', listEl.children.length, '件');
+  
+  // ファイルがアップロードされたら質問回答状況をリセット
+  _questionAnswered = false;
+  
+  // ボタンの状態を更新
+  updateRunButtonState();
 }
 
 function _syncAll(input, store, listEl, countEl){
-  _setInputFromStore(input, store);
-  fileCountBadge(input, countEl);
+  console.log('_syncAll呼び出し:', {
+    storeLength: store.length,
+    listEl: listEl ? listEl.id : 'null',
+    countEl: countEl ? countEl.id : 'null'
+  });
+  // input.filesは更新しない（重複を避けるため）
+  fileCountBadge(input, countEl, store);
   renderFileListFromStore(listEl, store);
 }
+
+// 質問に答えるボタンの処理
+document.addEventListener('DOMContentLoaded', ()=>{
+  const answerQuestionsBtn = document.getElementById('answerQuestionsBtn');
+  const questionModal = document.getElementById('questionModal');
+  const modalCancelBtn = document.getElementById('modalCancelBtn');
+  const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+  
+  // 初期状態でボタンを無効化
+  updateRunButtonState();
+  
+  if(answerQuestionsBtn){
+    answerQuestionsBtn.addEventListener('click', ()=>{
+      // ストアからファイルを取得
+      const incFiles = Array.from(_incStore);
+      const decFiles = Array.from(_decStore);
+      
+      if(incFiles.length === 0 && decFiles.length === 0){
+        alert('ファイルをアップロードしてください。');
+        return;
+      }
+      
+      // モーダルにファイルリストを生成
+      generateModalFileList(incFiles, decFiles);
+      
+      // モーダルを表示
+      questionModal.style.display = 'block';
+    });
+  }
+  
+  // モーダルキャンセル
+  if(modalCancelBtn){
+    modalCancelBtn.addEventListener('click', ()=>{
+      questionModal.style.display = 'none';
+    });
+  }
+  
+  // モーダル確定
+  if(modalConfirmBtn){
+    modalConfirmBtn.addEventListener('click', ()=>{
+      // 回答を収集してファイルリストに反映
+      collectAnswersAndUpdateDisplay();
+      questionModal.style.display = 'none';
+    });
+  }
+  
+  // モーダル外クリックでは閉じない（確定ボタンのみで閉じる）
+});
+
+// モーダル用ファイルリストを生成
+function generateModalFileList(incFiles, decFiles){
+  const modalFileList = document.getElementById('modalFileList');
+  modalFileList.innerHTML = '';
+  
+  let fileIndex = 0;
+  
+  // 増車ファイル
+  incFiles.forEach((file, idx) => {
+    const fileDiv = createModalFileItem(file, fileIndex, 'increase');
+    modalFileList.appendChild(fileDiv);
+    fileIndex++;
+  });
+  
+  // 減車ファイル
+  decFiles.forEach((file, idx) => {
+    const fileDiv = createModalFileItem(file, fileIndex, 'decrease');
+    modalFileList.appendChild(fileDiv);
+    fileIndex++;
+  });
+}
+
+// モーダル用ファイルアイテムを作成
+function createModalFileItem(file, index, type){
+  const div = document.createElement('div');
+  div.className = 'modal-file-item';
+  
+  const size = formatFileSize(file.size);
+  const typeLabel = type === 'increase' ? '増車' : '減車';
+  
+  div.innerHTML = `
+    <div class="file-info">
+      <span class="file-name">${file.name}</span>
+      <span class="file-size">${size}</span>
+      <span style="background:#3b82f6; color:white; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:600;">${typeLabel}</span>
+    </div>
+    
+    <div class="question-section">
+      <label class="question-label">① 種別</label>
+      <div class="radio-group">
+        <div class="radio-item">
+          <input type="radio" name="car_type_${index}" value="普通" checked>
+          <label>普通</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" name="car_type_${index}" value="小型">
+          <label>小型</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" name="car_type_${index}" value="けん引">
+          <label>けん引</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" name="car_type_${index}" value="被けん引">
+          <label>被けん引</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="question-section">
+      <label class="question-label">② 積載トン数</label>
+      <select name="weight_class_${index}">
+        <option value="to_2t">2.0トンまで</option>
+        <option value="2t_long">2.0トンロング</option>
+        <option value="over_2t_long_to_7_5t">2.0トンロング超～7.5トンまで</option>
+        <option value="over_7_5t">7.5トンを超えるもの</option>
+      </select>
+    </div>
+  `;
+  
+  return div;
+}
+
+// 回答を収集してファイルリストに反映
+function collectAnswersAndUpdateDisplay(){
+  // ストアからファイルを取得
+  const incFiles = Array.from(_incStore);
+  const decFiles = Array.from(_decStore);
+  const allFiles = [...incFiles, ...decFiles];
+  
+  // 各ファイルの回答を収集
+  const fileAnswers = [];
+  allFiles.forEach((file, index) => {
+    const carTypeRadio = document.querySelector(`input[name="car_type_${index}"]:checked`);
+    const weightSelect = document.querySelector(`select[name="weight_class_${index}"]`);
+    
+    // ファイルの種類は元のアップロード時の分類を使用
+    const fileType = incFiles.includes(file) ? 'increase' : 'decrease';
+    
+    fileAnswers.push({
+      file: file,
+      fileType: fileType,
+      carType: carTypeRadio ? carTypeRadio.value : '普通',
+      weightClass: weightSelect ? weightSelect.value : 'to_2t'
+    });
+  });
+  
+  // ファイルリストを更新（アイコン表示）
+  updateFileListWithAnswers(fileAnswers);
+}
+
+// ファイルリストを回答付きで更新
+function updateFileListWithAnswers(fileAnswers){
+  const incList = document.getElementById('incList');
+  const decList = document.getElementById('decList');
+  
+  // 既存のリストをクリア
+  incList.innerHTML = '';
+  decList.innerHTML = '';
+  
+  fileAnswers.forEach((answer, index) => {
+    const div = document.createElement('div');
+    div.className = 'filechip';
+    const size = formatFileSize(answer.file.size);
+    
+    // アイコンと情報を表示
+    const typeIcon = answer.fileType === 'increase' ? '📈' : '📉';
+    const typeLabel = answer.fileType === 'increase' ? '増車' : '減車';
+    
+    div.innerHTML = `
+      <button class="del" data-file-index="${index}" aria-label="削除" style="font-size:20px; padding:4px 8px; margin-right:8px;">×</button>
+      <span class="name" title="${answer.file.name}">${answer.file.name}</span>
+      <span class="size">${size}</span>
+      <span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; margin-left:8px;">${typeLabel}</span>
+      <span style="background:#10b981; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; margin-left:4px;">${answer.carType}</span>
+      <span style="background:#f59e0b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; margin-left:4px;">${getWeightLabel(answer.weightClass)}</span>
+    `;
+    
+    if(answer.fileType === 'increase'){
+      incList.appendChild(div);
+    } else {
+      decList.appendChild(div);
+    }
+  });
+  
+  // 削除ボタンのイベントリスナーを追加
+  addDeleteListeners();
+  
+  // 質問に答えたことを記録
+  _questionAnswered = true;
+  
+  // ボタンの状態を更新
+  updateRunButtonState();
+}
+
+// ファイルの質問回答状況を追跡する変数
+let _questionAnswered = false;
+
+// ボタンの状態を更新する関数
+function updateRunButtonState(){
+  const runBtn = document.getElementById('runBtn');
+  const incFiles = Array.from(_incStore);
+  const decFiles = Array.from(_decStore);
+  const allFiles = [...incFiles, ...decFiles];
+  
+  if(allFiles.length === 0 || !_questionAnswered){
+    // ファイルがない場合、または質問に答えていない場合は無効化
+    runBtn.disabled = true;
+    runBtn.style.background = '#94a3b8';
+    runBtn.style.cursor = 'not-allowed';
+    runBtn.style.boxShadow = '0 4px 12px rgba(148,163,184,0.3)';
+  } else {
+    // ファイルがあり、質問に答えた場合は有効化
+    runBtn.disabled = false;
+    runBtn.style.background = '#3b82f6';
+    runBtn.style.cursor = 'pointer';
+    runBtn.style.boxShadow = '0 4px 12px rgba(59,130,246,0.3)';
+  }
+}
+
+// 削除ボタンのイベントリスナーを追加
+function addDeleteListeners(){
+  const incList = document.getElementById('incList');
+  const decList = document.getElementById('decList');
+  
+  // 増車ファイルの削除
+  if(incList){
+    incList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.del');
+      if(!btn) return;
+      const fileIndex = +btn.dataset.fileIndex;
+      if(Number.isInteger(fileIndex)){
+                // ストアからファイルを削除
+                _incStore.splice(fileIndex, 1);
+                // ファイルリストを再生成
+                const incFiles = Array.from(_incStore);
+                const decFiles = Array.from(_decStore);
+                const allFiles = [...incFiles, ...decFiles];
+                
+                if(allFiles.length === 0){
+                  // ファイルがない場合は空のリストを表示
+                  incList.innerHTML = '';
+                  decList.innerHTML = '';
+                  // カウントを更新
+                  const incCount = document.getElementById('incCount');
+                  const decCount = document.getElementById('decCount');
+                  if(incCount) incCount.textContent = '';
+                  if(decCount) decCount.textContent = '';
+                } else {
+                  // ファイルがある場合は回答付きで再表示
+                  const fileAnswers = [];
+                  allFiles.forEach((file, index) => {
+                    const carTypeRadio = document.querySelector(`input[name="car_type_${index}"]:checked`);
+                    const weightSelect = document.querySelector(`select[name="weight_class_${index}"]`);
+                    const fileType = incFiles.includes(file) ? 'increase' : 'decrease';
+                    
+                    fileAnswers.push({
+                      file: file,
+                      fileType: fileType,
+                      carType: carTypeRadio ? carTypeRadio.value : '普通',
+                      weightClass: weightSelect ? weightSelect.value : 'to_2t'
+                    });
+                  });
+                  updateFileListWithAnswers(fileAnswers);
+                }
+                
+                // ファイルが削除されたら質問回答状況をリセット
+                _questionAnswered = false;
+                
+                // ボタンの状態を更新
+                updateRunButtonState();
+      }
+    });
+  }
+  
+  // 減車ファイルの削除
+  if(decList){
+    decList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.del');
+      if(!btn) return;
+      const fileIndex = +btn.dataset.fileIndex;
+      if(Number.isInteger(fileIndex)){
+                // ストアからファイルを削除
+                _decStore.splice(fileIndex, 1);
+                // ファイルリストを再生成
+                const incFiles = Array.from(_incStore);
+                const decFiles = Array.from(_decStore);
+                const allFiles = [...incFiles, ...decFiles];
+                
+                if(allFiles.length === 0){
+                  // ファイルがない場合は空のリストを表示
+                  incList.innerHTML = '';
+                  decList.innerHTML = '';
+                  // カウントを更新
+                  const incCount = document.getElementById('incCount');
+                  const decCount = document.getElementById('decCount');
+                  if(incCount) incCount.textContent = '';
+                  if(decCount) decCount.textContent = '';
+                } else {
+                  // ファイルがある場合は回答付きで再表示
+                  const fileAnswers = [];
+                  allFiles.forEach((file, index) => {
+                    const carTypeRadio = document.querySelector(`input[name="car_type_${index}"]:checked`);
+                    const weightSelect = document.querySelector(`select[name="weight_class_${index}"]`);
+                    const fileType = incFiles.includes(file) ? 'increase' : 'decrease';
+                    
+                    fileAnswers.push({
+                      file: file,
+                      fileType: fileType,
+                      carType: carTypeRadio ? carTypeRadio.value : '普通',
+                      weightClass: weightSelect ? weightSelect.value : 'to_2t'
+                    });
+                  });
+                  updateFileListWithAnswers(fileAnswers);
+                }
+                
+                // ファイルが削除されたら質問回答状況をリセット
+                _questionAnswered = false;
+                
+                // ボタンの状態を更新
+                updateRunButtonState();
+      }
+    });
+  }
+}
+
+// 重量クラスのラベルを取得
+function getWeightLabel(weightClass){
+  const labels = {
+    'to_2t': '2.0t',
+    '2t_long': '2.0tL',
+    'over_2t_long_to_7_5t': '2.0tL+',
+    'over_7_5t': '7.5t+'
+  };
+  return labels[weightClass] || weightClass;
+}
+
+// ===============================================================
 
 document.addEventListener('DOMContentLoaded', ()=>{
   const incInput = document.getElementById('increase_files') || document.getElementById('incInput');
@@ -294,23 +669,44 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const incCount = document.getElementById('incCount');
   const decCount = document.getElementById('decCount');
 
-  // 追加ボタン → 既存inputを開いて追加
-  const incAdd = document.getElementById('incAddBtn');
-  const decAdd = document.getElementById('decAddBtn');
-  if(incAdd && incInput){ incAdd.addEventListener('click', ()=> incInput.click()); }
-  if(decAdd && decInput){ decAdd.addEventListener('click', ()=> decInput.click()); }
+  console.log('DOM要素取得状況:', {
+    incInput: incInput ? incInput.id : 'null',
+    decInput: decInput ? decInput.id : 'null',
+    incList: incList ? incList.id : 'null',
+    decList: decList ? decList.id : 'null',
+    incCount: incCount ? incCount.id : 'null',
+    decCount: decCount ? decCount.id : 'null'
+  });
+
+  // 追加ボタンは削除されたため、枠内タップのみでファイル選択
 
   // 既存 change を拡張：新規選択を store にマージ
   if(incInput){
     incInput.addEventListener('change', (e)=>{
-      _mergeFiles(_incStore, e.target.files);
-      _syncAll(incInput, _incStore, incList, incCount);
+      console.log('増車ファイル選択:', e.target.files.length, '件');
+      if(e.target.files && e.target.files.length > 0){
+        const beforeCount = _incStore.length;
+        _mergeFiles(_incStore, e.target.files);
+        const afterCount = _incStore.length;
+        console.log('増車ストア:', beforeCount, '→', afterCount, '件');
+        _syncAll(incInput, _incStore, incList, incCount);
+        // inputをクリアして次回の選択を可能にする
+        e.target.value = '';
+      }
     });
   }
   if(decInput){
     decInput.addEventListener('change', (e)=>{
-      _mergeFiles(_decStore, e.target.files);
-      _syncAll(decInput, _decStore, decList, decCount);
+      console.log('減車ファイル選択:', e.target.files.length, '件');
+      if(e.target.files && e.target.files.length > 0){
+        const beforeCount = _decStore.length;
+        _mergeFiles(_decStore, e.target.files);
+        const afterCount = _decStore.length;
+        console.log('減車ストア:', beforeCount, '→', afterCount, '件');
+        _syncAll(decInput, _decStore, decList, decCount);
+        // inputをクリアして次回の選択を可能にする
+        e.target.value = '';
+      }
     });
   }
 
@@ -340,9 +736,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // すでにある wireDrop() は input に files をセットして change を発火するので、
   // ここでの change ハンドラが store にマージし、UIと件数を更新します（互換維持）。
+  
+  // ドラッグ&ドロップ処理を設定
+  wireDrop('incZone', 'incInput', _incStore, incList, incCount);
+  wireDrop('decZone', 'decInput', _decStore, decList, decCount);
 });
-// ===============================================================
-
 
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
@@ -367,24 +765,28 @@ function renderFileList(inputEl, listEl){
   });
 }
 
-function wireDrop(zoneId, inputId){
+function wireDrop(zoneId, inputId, store, listEl, countEl){
   const zone = document.getElementById(zoneId);
   const input = document.getElementById(inputId);
-  zone.addEventListener('click', ()=> input.click());
+  // zone.addEventListener('click', ()=> input.click()); // <label>との二重トリガを避けるため削除
   zone.addEventListener('focus', ()=> zone.classList.add('active'));
   zone.addEventListener('blur',  ()=> zone.classList.remove('active'));
   ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev, e=>{e.preventDefault(); zone.classList.add('active');}));
   ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev, e=>{e.preventDefault(); zone.classList.remove('active');}));
-  zone.addEventListener('drop', e=>{ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); });
+  zone.addEventListener('drop', e=>{ 
+    console.log('ドラッグ&ドロップ:', e.dataTransfer.files.length, '件');
+    const beforeCount = store.length;
+    _mergeFiles(store, e.dataTransfer.files);
+    const afterCount = store.length;
+    console.log('ストア更新:', beforeCount, '→', afterCount, '件');
+    _syncAll(input, store, listEl, countEl);
+  });
 }
-function fileCountBadge(input, badgeEl){
-  const n = input.files?.length || 0;
+function fileCountBadge(input, badgeEl, store){
+  const n = store?.length || 0;
   badgeEl.textContent = n ? `（${n}件選択）` : '';
 }
-wireDrop('incZone', 'incInput');
-wireDrop('decZone', 'decInput');
-// handled by enhanced change handler
-// handled by enhanced change handler
+// wireDropの呼び出しは、DOMContentLoaded内で行う
 
 const tabInput = document.getElementById('tab-input');
 const tabDb = document.getElementById('tab-db');
@@ -455,7 +857,74 @@ function renderTable(){
 document.getElementById('db-edit').addEventListener('click', ()=>{
   editable = !editable;
   renderTable();
-  document.getElementById('db-msg').textContent = editable ? '編集モード' : '閲覧モード';
+  const modeIndicator = document.getElementById('mode-indicator');
+  const saveBtn = document.getElementById('db-save');
+  const addAboveBtn = document.getElementById('db-add-above');
+  const addBtn = document.getElementById('db-add');
+  const delBtn = document.getElementById('db-del');
+  
+  if(editable){
+    modeIndicator.textContent = '編集モード';
+    modeIndicator.style.color = '#10b981';
+    modeIndicator.style.borderColor = '#10b981';
+    modeIndicator.style.background = '#f0fdf4';
+    
+    // ボタンを有効化
+    saveBtn.disabled = false;
+    saveBtn.style.background = '#3b82f6';
+    saveBtn.style.cursor = 'pointer';
+    saveBtn.style.opacity = '1';
+    
+    addAboveBtn.disabled = false;
+    addAboveBtn.style.background = '#10b981';
+    addAboveBtn.style.cursor = 'pointer';
+    addAboveBtn.style.opacity = '1';
+    
+    addBtn.disabled = false;
+    addBtn.style.background = '#10b981';
+    addBtn.style.cursor = 'pointer';
+    addBtn.style.opacity = '1';
+    
+    delBtn.disabled = false;
+    delBtn.style.background = '#10b981';
+    delBtn.style.cursor = 'pointer';
+    delBtn.style.opacity = '1';
+  } else {
+    modeIndicator.textContent = '閲覧モード';
+    modeIndicator.style.color = '#3b82f6';
+    modeIndicator.style.borderColor = '#e2e8f0';
+    modeIndicator.style.background = '#f8fafc';
+    
+    // ボタンを無効化
+    saveBtn.disabled = true;
+    saveBtn.style.background = '#94a3b8';
+    saveBtn.style.cursor = 'not-allowed';
+    saveBtn.style.opacity = '0.6';
+    
+    addAboveBtn.disabled = true;
+    addAboveBtn.style.background = '#94a3b8';
+    addAboveBtn.style.cursor = 'not-allowed';
+    addAboveBtn.style.opacity = '0.6';
+    
+    addBtn.disabled = true;
+    addBtn.style.background = '#94a3b8';
+    addBtn.style.cursor = 'not-allowed';
+    addBtn.style.opacity = '0.6';
+    
+    delBtn.disabled = true;
+    delBtn.style.background = '#94a3b8';
+    delBtn.style.cursor = 'not-allowed';
+    delBtn.style.opacity = '0.6';
+  }
+});
+document.getElementById('db-add-above').addEventListener('click', ()=>{
+  if(!editable){ alert('編集開始を押してください'); return; }
+  if(!selectedRow){ alert('行を選択してください'); return; }
+  const idx = parseInt(selectedRow.dataset.idx, 10);
+  const empty = Object.fromEntries(DB.headers.map(h=>[h,'']));
+  DB.records.splice(idx, 0, empty); 
+  selectedRow = null; 
+  renderTable();
 });
 document.getElementById('db-add').addEventListener('click', ()=>{
   if(!editable){ alert('編集開始を押してください'); return; }
@@ -500,36 +969,104 @@ async function isZip(file){
 
 runBtn.addEventListener('click', async ()=>{
 
-  const fd = new FormData(form);
-  const inc = document.getElementById('incInput'); const dec = document.getElementById('decInput');
-  // .xlsx quick validation to prevent non-Excel uploads
-  for(const f of [...inc.files, ...dec.files]){
-    if(!(await isZip(f))){ upStatus.textContent = '失敗: Excel(.xlsx)以外の可能性があります。'; return; }
+  const fd = new FormData();
+  const upStatus = document.getElementById('upStatus');
+  
+  // ストアからファイルと回答データを取得
+  const incFiles = Array.from(_incStore);
+  const decFiles = Array.from(_decStore);
+  const allFiles = [...incFiles, ...decFiles];
+  
+  if(allFiles.length === 0){
+    upStatus.textContent = 'ファイルをアップロードしてください。';
+    return;
   }
-  // 既存nameに追加（hiddenがあるため保険的にappend）
-  for(const f of inc.files) fd.append('increase_files', f);
-  for(const f of dec.files) fd.append('decrease_files', f);
+  
+  // .xlsx quick validation to prevent non-Excel uploads
+  for(const f of allFiles){
+    if(!(await isZip(f))){ 
+      upStatus.textContent = '失敗: Excel(.xlsx)以外の可能性があります。'; 
+      return; 
+    }
+  }
+  
+  // 回答データを収集
+  const fileAnswers = [];
+  allFiles.forEach((file, index) => {
+    const carTypeRadio = document.querySelector(`input[name="car_type_${index}"]:checked`);
+    const weightSelect = document.querySelector(`select[name="weight_class_${index}"]`);
+    
+    // ファイルの種類は元のアップロード時の分類を使用
+    const fileType = incFiles.includes(file) ? 'increase' : 'decrease';
+    
+    fileAnswers.push({
+      file: file,
+      fileType: fileType,
+      carType: carTypeRadio ? carTypeRadio.value : '普通',
+      weightClass: weightSelect ? weightSelect.value : 'to_2t'
+    });
+  });
+  
+  // FormDataに追加
+  let incIndex = 0;
+  let decIndex = 0;
+  
+  fileAnswers.forEach((answer, index) => {
+    if(answer.fileType === 'increase'){
+      fd.append('increase_files', answer.file);
+      fd.append(`inc_car_type_${incIndex}`, answer.carType);
+      fd.append(`inc_weight_class_${incIndex}`, answer.weightClass);
+      incIndex++;
+    } else {
+      fd.append('decrease_files', answer.file);
+      fd.append(`dec_car_type_${decIndex}`, answer.carType);
+      fd.append(`dec_weight_class_${decIndex}`, answer.weightClass);
+      decIndex++;
+    }
+  });
 
   runBtn.disabled = true;
-  upStatus.innerHTML = '<span class="spinner"></span><span class="progress" id="prog">アップロード中…</span>';
+  upStatus.innerHTML = '<span class="spinner"></span><span class="progress" id="prog">処理中…</span>';
 
   try{
     const blob = await xhrPostWithProgress('/process', fd, (percent)=>{
       const p = document.getElementById('prog');
-      p.textContent = `アップロード中… ${percent}%`;
+      p.textContent = `処理中… ${percent}%`;
     });
     const fname = '事業計画変更届出.xlsx';
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = fname;
     document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    
+    // ファイル選択をリセット
     resetUploadsAfterSuccess();
-    upStatus.textContent = 'アップロードが完了しました。ファイルをダウンロードしました。';
+    
+    upStatus.textContent = '処理が完了しました。ファイルをダウンロードしました。';
+    
+    // ダウンロード成功後にファイルをクリア
+    _incStore.length = 0;
+    _decStore.length = 0;
+    _questionAnswered = false;
+    
+    // ファイルリストをクリア
+    const incList = document.getElementById('incList');
+    const decList = document.getElementById('decList');
+    if(incList) incList.innerHTML = '';
+    if(decList) decList.innerHTML = '';
+    
+    // カウント表示をクリア
+    const incCount = document.getElementById('incCount');
+    const decCount = document.getElementById('decCount');
+    if(incCount) incCount.textContent = '';
+    if(decCount) decCount.textContent = '';
+    
+    // ボタンの状態を更新
+    updateRunButtonState();
+    
   }catch(e){
     upStatus.textContent = '失敗: ' + e.message;
   }finally{
     runBtn.disabled = false;
-    document.getElementById('incInput').dispatchEvent(new Event('change'));
-    document.getElementById('decInput').dispatchEvent(new Event('change'));
   }
 });
 

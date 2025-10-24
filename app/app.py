@@ -670,20 +670,30 @@ def apply_model_years(xlsx: Path, modes, inc_files, dec_files, sheet_index: int 
 
 @app.post("/process")
 def process():
-    car_type = request.form.get("car_type", "普通").strip()
     inc_files = [f for f in request.files.getlist("increase_files") if getattr(f, "filename", "")]
     dec_files = [f for f in request.files.getlist("decrease_files") if getattr(f, "filename", "")]
-    inc_w = (request.form.get("inc_weight_class") or "").strip()
-    dec_w = (request.form.get("dec_weight_class") or "").strip()
-    if not dec_w:
-        dec_w = inc_w
+    
+    # ファイル別の選択値を取得
+    inc_car_types = []
+    inc_weight_classes = []
+    dec_car_types = []
+    dec_weight_classes = []
+    
+    # 増車ファイルの選択値を取得
+    for i in range(len(inc_files)):
+        car_type = request.form.get(f"inc_car_type_{i}", "普通").strip()
+        weight_class = request.form.get(f"inc_weight_class_{i}", "to_2t").strip()
+        inc_car_types.append(car_type)
+        inc_weight_classes.append(weight_class)
+    
+    # 減車ファイルの選択値を取得
+    for i in range(len(dec_files)):
+        car_type = request.form.get(f"dec_car_type_{i}", "普通").strip()
+        weight_class = request.form.get(f"dec_weight_class_{i}", "to_2t").strip()
+        dec_car_types.append(car_type)
+        dec_weight_classes.append(weight_class)
     inc_files = _uniq_files(inc_files)
     dec_files = _uniq_files(dec_files)
-    if inc_files and dec_files:
-        return js_alert(
-            "増車と減車を同時にアップロードできません。どちらか一方のみを選択して再実行してください。",
-            status=400
-    )
     if not inc_files and not dec_files:
         return js_alert("増車・減車どちらかのファイルをアップロードしてください。", status=400)
 
@@ -698,6 +708,12 @@ def process():
     offices = {m[1]["office_name"] for m in metas}
     if len(companies) != 1 or len(offices) != 1:
         return js_alert("アップロード内で会社名/営業所名が混在しています。1社1拠点で実行してください。", status=400)
+    
+    # 同一会社同一営業所の場合は増車と減車の同時アップロードを許可
+    # 異なる会社・営業所の場合は増車と減車の同時アップロードを禁止
+    if inc_files and dec_files:
+        # 既に同一会社同一営業所のチェックは上で通過しているので、同時アップロードを許可
+        pass
 
     company_name = next(iter(companies))
     office_name = next(iter(offices))
@@ -709,9 +725,18 @@ def process():
         return js_alert(f"会社・拠点がDBに見つかりません。会社={company_name} / 営業所={office_name}", status=404)
 
     old_counts = get_type_counts_from_row(db_flat["records"][idx])
+    
+    # ファイル別の減車数をチェック
     dec_n = len(dec_files)
-    if dec_n and old_counts.get(car_type, 0) - dec_n < 0:
-        return js_alert(f"現在、{company_name} {office_name} の {car_type} が不足します（減車{dec_n}台は不可）。", status=409)
+    if dec_n:
+        # 各ファイルの種別ごとに減車数をチェック
+        car_type_counts = {}
+        for car_type in dec_car_types:
+            car_type_counts[car_type] = car_type_counts.get(car_type, 0) + 1
+        
+        for car_type, count in car_type_counts.items():
+            if old_counts.get(car_type, 0) - count < 0:
+                return js_alert(f"現在、{company_name} {office_name} の {car_type} が不足します（減車{count}台は不可）。", status=409)
 
     tpl_path = SRC / TPL_NAME
     if not tpl_path.exists():
@@ -721,14 +746,40 @@ def process():
     shutil.copyfile(tpl_path, work)
 
     new_counts = old_counts.copy()
+    
+    # ファイル別の増車処理
     if inc_files:
-        new_counts = update_db_counts_inplace(db_flat, idx, car_type, +len(inc_files))
+        car_type_counts = {}
+        weight_class_counts = {}
+        for i, car_type in enumerate(inc_car_types):
+            car_type_counts[car_type] = car_type_counts.get(car_type, 0) + 1
+            weight_class = inc_weight_classes[i]
+            weight_class_counts[weight_class] = weight_class_counts.get(weight_class, 0) + 1
+        
+        # 種別ごとにDB更新
+        for car_type, count in car_type_counts.items():
+            new_counts = update_db_counts_inplace(db_flat, idx, car_type, +count)
+        
+        # 重量クラスごとにDB更新
+        for weight_class, count in weight_class_counts.items():
+            update_db_weight_inplace(db_flat, idx, weight_class, +count)
+    
+    # ファイル別の減車処理
     if dec_files:
-        new_counts = update_db_counts_inplace(db_flat, idx, car_type, -len(dec_files))
-    if inc_files and inc_w:
-        update_db_weight_inplace(db_flat, idx, inc_w, +len(inc_files))
-    if dec_files and dec_w:
-        update_db_weight_inplace(db_flat, idx, dec_w, -len(dec_files))
+        car_type_counts = {}
+        weight_class_counts = {}
+        for i, car_type in enumerate(dec_car_types):
+            car_type_counts[car_type] = car_type_counts.get(car_type, 0) + 1
+            weight_class = dec_weight_classes[i]
+            weight_class_counts[weight_class] = weight_class_counts.get(weight_class, 0) + 1
+        
+        # 種別ごとにDB更新
+        for car_type, count in car_type_counts.items():
+            new_counts = update_db_counts_inplace(db_flat, idx, car_type, -count)
+        
+        # 重量クラスごとにDB更新
+        for weight_class, count in weight_class_counts.items():
+            update_db_weight_inplace(db_flat, idx, weight_class, -count)
     put_weight_totals_to_sheet(work, db_flat["records"][idx])
 
     put_old_new_counts(work, office_disp, old_counts, new_counts)
