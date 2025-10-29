@@ -8,15 +8,15 @@
     --zone-hover-shadow: rgba(255,179,0,0.25);
     --accent: #0b70ff;
   }
-  html, body { height: 100%; }
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; margin:0; padding:0; box-sizing:border-box; background:#f8fafc; min-height:100vh; line-height:1.6;}
+  html, body { height: 100%; overflow-x: hidden; }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; margin:0; padding:0; box-sizing:border-box; background:#f8fafc; min-height:100vh; line-height:1.6; overflow-x: hidden;}
   .tabs{display:flex;gap:4px;margin-bottom:24px;background:#f8fafc;border-radius:12px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:1px solid #e2e8f0;}
   .tab{padding:12px 24px;border:none;border-radius:8px;cursor:pointer;user-select:none;font-weight:600;font-size:14px;color:#64748b;background:transparent;transition:all 0.2s ease;}
   .tab.active{background:#3b82f6;color:#ffffff;box-shadow:0 2px 4px rgba(59,130,246,0.3);}
   .hidden{display:none}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:24px;margin-bottom:24px;}
-  .zone{border:2px dashed #e2e8f0;border-radius:12px;padding:24px;cursor:pointer;min-height:200px;background:#ffffff;transition:all 0.2s ease;position:relative;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
-  .zone:hover,.zone.active{background:#f8fafc; border-color:#3b82f6; box-shadow:0 8px 16px rgba(0,0,0,0.1); transform:translateY(-1px);}
+  .zone{border:2px dashed #e2e8f0;border-radius:12px;padding:24px;cursor:pointer;min-height:400px;background:#f1f5f9;transition:all 0.2s ease;position:relative;box-shadow:0 4px 12px rgba(0,0,0,0.08);} 
+  .zone:hover,.zone.active{background:#f1f5f9; border-color:#3b82f6; box-shadow:0 4px 12px rgba(0,0,0,0.08); transform:translateY(-1px);} 
   .hint{color:#94a3b8;font-size:12px;margin-top:6px}
   .radios label{margin-right:10px}
   .toolbar{display:flex; gap:8px; margin:8px 0}
@@ -25,20 +25,26 @@
   #runBtn:hover{transform:translateY(-2px); box-shadow:0 15px 35px rgba(102,126,234,0.4);}
   .btn[disabled]{opacity:.55; cursor:not-allowed}
   td[contenteditable="true"]{background:#fffbe6}
+  /* 合計不一致行のハイライト（保存時に付与） */
+  tr.invalid-row td { background:#e0f2fe !important; }
   tr.selected{outline:2px solid #2ecc71}
-  table{border-collapse:collapse; min-width:900px; width:100%;}
+  table{border-collapse:collapse; width:100%; max-width:100%;}
   th{background:#f8fafc; border:1px solid #e2e8f0; padding:12px 16px; font-size:14px; font-weight:600; color:#1e293b; text-align:left;}
   td{border:1px solid #e2e8f0; padding:12px 16px; font-size:14px; color:#374151;}
+  /* 編集不可のセル（キー列）のスタイル */
+  td[data-col="会社キー"], td[data-col="拠点キー"]{
+    background:#f8fafc; color:#64748b; cursor:not-allowed;
+  }
   /* DB全画面高さ用のラッパ */
-  .db-wrap{overflow:auto; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-top:16px; height: 50vh; background:#ffffff;}
+  .db-wrap{overflow-x: hidden; overflow-y: auto; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-top:16px; height: 50vh; background:#ffffff;}
   /* ステータス/スピナー */
   .status{margin-left:10px; color:#555}
   .spinner{display:inline-block; width:1em; height:1em; border:2px solid #999; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-2px; margin-right:6px}
   @keyframes spin{to{transform:rotate(360deg)}}
   .progress{display:inline-block; min-width:80px}
 
-  .filelist{display:flex; flex-direction:column; gap:8px; max-height:120px; overflow-y:auto; margin-bottom:12px;}
-  .filechip{display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid #e2e8f0; border-radius:12px; background:#ffffff; transition:all 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+  .filelist{display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto; margin-bottom:12px; position:relative; z-index:2;}
+  .filechip{display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid #e2e8f0; border-radius:12px; background:#f1f5f9; transition:all 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow:0 4px 12px rgba(0,0,0,0.08);} 
   .filechip:hover{border-color:#667eea; background:#f8fafc; transform:translateY(-1px); box-shadow:0 4px 6px rgba(0,0,0,0.1);}
   .filechip svg{width:20px; height:20px; flex:0 0 auto; color:#10b981}
   .filechip .name{font-size:14px; color:#1a202c; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -46,7 +52,7 @@
   .filechip .del{cursor:pointer; border:none; background:#fee2e2; color:#dc2626; font-size:12px; line-height:1; padding:6px 8px; border-radius:8px; transition:all 0.2s ease; font-weight:600;}
   .filechip .del:hover{background:#fecaca; transform:scale(1.05);}
   /* ファイル選択画面用のスタイル */
-  .file-selection-chip{display:flex; flex-direction:column; gap:12px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; background:#ffffff; transition:all 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow:0 1px 3px rgba(0,0,0,0.1); margin-bottom:16px;}
+  .file-selection-chip{display:flex; flex-direction:column; gap:12px; padding:16px; border:1px solid #e2e8f0; border-radius:12px; background:#f1f5f9; transition:all 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:16px;}
   .file-selection-chip:hover{border-color:#667eea; background:#f8fafc; transform:translateY(-1px); box-shadow:0 4px 6px rgba(0,0,0,0.1);}
   .file-selection-chip .file-header{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
   .file-selection-chip .file-options{display:flex; flex-direction:column; gap:12px;}
@@ -59,7 +65,7 @@
   .file-selection-chip .radio-item label{font-size:14px; font-weight:500; color:#4b5563; cursor:pointer;}
   .file-selection-chip select{width:100%; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:#ffffff;}
   /* モーダル用スタイル */
-  .modal-file-item{margin-bottom:24px; padding:20px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc;}
+  .modal-file-item{margin-bottom:24px; padding:20px; border:1px solid #e2e8f0; border-radius:12px; background:#f1f5f9; box-shadow:0 4px 12px rgba(0,0,0,0.08);} 
   .modal-file-item .file-info{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
   .modal-file-item .file-name{font-size:16px; font-weight:600; color:#1e293b;}
   .modal-file-item .file-size{font-size:14px; color:#64748b;}
@@ -79,8 +85,8 @@
   <div style="width:100%; padding:0 24px; margin-top:0;">
     <div style="background:#ffffff; border-radius:16px; padding:32px; box-shadow:0 4px 6px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
       <div class="tabs" style="margin-bottom:16px;">
-        <div id="tab-input" class="tab active">📝 作成</div>
-        <div id="tab-db" class="tab">🗃️ データベース</div>
+        <div id="tab-input" class="tab active" style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>作成</div>
+        <div id="tab-db" class="tab" style="display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>データベース</div>
       </div>
       <div id="input-content">
         <div style="text-align:center; margin-bottom:32px;">
@@ -111,7 +117,7 @@
           <p style="color:#64748b; font-size:14px; margin:0;">ここをクリック / ファイルをドロップ</p>
         </div>
         <input id="incInput" type="file" name="increase_files" multiple accept=".xlsx" hidden>
-        <label for="incInput" style="display:block; position:absolute; top:0; left:0; right:0; height:120px; cursor:pointer; z-index:1;"></label>
+        <label for="incInput" style="display:block; position:absolute; top:0; left:0; right:0; bottom:0; cursor:pointer; z-index:1; pointer-events:auto;"></label>
         <div style="margin-top:16px;">
           <div id="incList" class="filelist" aria-live="polite" style="margin-bottom:12px;"></div>
           <div style="font-size:12px; color:#718096; text-align:center;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="incCount" style="font-weight:600; color:#667eea;"></span></div>
@@ -119,7 +125,7 @@
       </div>
       <div class="zone" id="decZone" tabindex="0">
         <div style="text-align:center; margin-bottom:16px;">
-          <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; background:#f59e0b; border-radius:12px; margin-bottom:12px;">
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; background:#10b981; border-radius:12px; margin-bottom:12px;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7,10 12,15 17,10"></polyline>
@@ -130,7 +136,7 @@
           <p style="color:#64748b; font-size:14px; margin:0;">ここをクリック / ファイルをドロップ</p>
         </div>
         <input id="decInput" type="file" name="decrease_files" multiple accept=".xlsx" hidden>
-        <label for="decInput" style="display:block; position:absolute; top:0; left:0; right:0; height:120px; cursor:pointer; z-index:1;"></label>
+        <label for="decInput" style="display:block; position:absolute; top:0; left:0; right:0; bottom:0; cursor:pointer; z-index:1; pointer-events:auto;"></label>
         <div style="margin-top:16px;">
           <div id="decList" class="filelist" aria-live="polite" style="margin-bottom:12px;"></div>
           <div style="font-size:12px; color:#718096; text-align:center;">同一会社・同一拠点のファイルのみ一括アップロード可 <span id="decCount" style="font-weight:600; color:#667eea;"></span></div>
@@ -139,7 +145,7 @@
     </div>
 
     <div style="margin-top:32px; text-align:center;">
-      <button id="answerQuestionsBtn" style="background:#f59e0b; color:white; border:none; padding:16px 32px; font-size:16px; font-weight:600; border-radius:12px; cursor:pointer; transition:all 0.2s ease; box-shadow:0 4px 12px rgba(245,158,11,0.3); margin-right:16px;">
+      <button id="answerQuestionsBtn" style="background:#2563eb; color:white; border:none; padding:16px 32px; font-size:16px; font-weight:600; border-radius:12px; cursor:pointer; transition:all 0.2s ease; box-shadow:0 4px 12px rgba(37,99,235,0.3); margin-right:16px;">
         <span style="display:flex; align-items:center; justify-content:center; gap:8px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -165,24 +171,13 @@
       </div>
 
       <div id="db-content" class="hidden">
-        <div style="text-align:center; margin-bottom:32px;">
-          <div style="display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; background:#3b82f6; border-radius:12px; margin-bottom:16px;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="9" y1="9" x2="15" y2="9"></line>
-              <line x1="9" y1="15" x2="15" y2="15"></line>
-            </svg>
-          </div>
-          <h1 style="font-size:28px; font-weight:700; color:#1e293b; margin:0 0 8px 0;">データベース管理</h1>
-          <p style="color:#64748b; margin:0; font-size:16px;">会社・営業所データの確認と編集ができます</p>
-        </div>
         <div class="toolbar" style="position:sticky; top:0; background:#ffffff; z-index:10; padding:16px 0; margin-bottom:20px; border-bottom:1px solid #e2e8f0; display:flex; gap:12px; flex-wrap:wrap;">
-          <button id="db-edit" style="padding:12px 20px; border:2px solid #3b82f6; border-radius:10px; background:#3b82f6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(59,130,246,0.3);">📝 編集開始</button>
-          <button id="db-save" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">💾 保存</button>
-          <button id="db-add-above" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">➕ 選択行の上に行を追加</button>
-          <button id="db-add" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">➕ 行を一番下に追加</button>
-          <button id="db-del" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6;">🗑️ 選択行を削除</button>
-          <a id="db-download" style="padding:12px 20px; border:2px solid #f59e0b; border-radius:10px; background:#f59e0b; color:#ffffff; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(245,158,11,0.3); text-decoration:none; display:inline-block;" href="/db/csv">📊 CSV</a>
+          <button id="db-edit" style="padding:12px 20px; border:2px solid #3b82f6; border-radius:10px; background:#3b82f6; color:#ffffff; cursor:pointer; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(59,130,246,0.3); display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>編集開始</button>
+          <button id="db-save" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</button>
+          <button id="db-add-above" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>選択行の上に行を追加</button>
+          <button id="db-add" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>一番下に行を追加</button>
+            <button id="db-del" disabled style="padding:12px 20px; border:2px solid #94a3b8; border-radius:10px; background:#94a3b8; color:#ffffff; cursor:not-allowed; margin-right:12px; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(148,163,184,0.3); opacity:0.6; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>選択行を削除</button>
+          <a id="db-download" style="padding:12px 20px; border:2px solid #f59e0b; border-radius:10px; background:#f59e0b; color:#ffffff; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s ease; box-shadow:0 2px 4px rgba(245,158,11,0.3); text-decoration:none; display:inline-flex; align-items:center; gap:8px;" href="/db/csv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSV</a>
           <span id="db-msg" style="margin-left:12px; color:#64748b; font-weight:500;"></span>
         </div>
         <div id="mode-indicator" style="text-align:center; margin-bottom:16px; font-size:20px; font-weight:700; color:#3b82f6; padding:12px; background:#f8fafc; border-radius:8px; border:2px solid #e2e8f0;">
@@ -198,7 +193,7 @@
 
 <!-- 質問モーダル -->
 <div id="questionModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); overflow-y:auto;">
-  <div class="modal-content" style="background-color:#ffffff; margin:2% auto; padding:32px; border-radius:16px; width:90%; max-width:700px; max-height:90vh; box-shadow:0 8px 32px rgba(0,0,0,0.2); overflow-y:auto;">
+  <div class="modal-content" style="background-color:#ffffff; margin:2% auto; padding:32px; border-radius:16px; width:90%; max-width:700px; max-height:90vh; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto;">
     <div style="text-align:center; margin-bottom:32px;">
       <h2 style="font-size:24px; font-weight:700; color:#1e293b; margin:0 0 8px 0;">ファイルの詳細を入力してください</h2>
       <p style="color:#64748b; margin:0; font-size:16px;">アップロードされたファイルの種別と積載トン数を選択してください</p>
@@ -209,11 +204,11 @@
     </div>
     
     <div style="text-align:center;">
-      <button id="modalCancelBtn" style="background:#6b7280; color:white; border:none; padding:12px 24px; font-size:14px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s ease; margin-right:12px;">
-        キャンセル
-      </button>
-      <button id="modalConfirmBtn" style="background:#3b82f6; color:white; border:none; padding:12px 24px; font-size:14px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s ease;">
+      <button id="modalConfirmBtn" style="background:#3b82f6; color:white; border:none; padding:12px 24px; font-size:14px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s ease; margin-right:12px;">
         確定
+      </button>
+      <button id="modalCancelBtn" style="background:#6b7280; color:white; border:none; padding:12px 24px; font-size:14px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s ease;">
+        キャンセル
       </button>
     </div>
   </div>
@@ -270,11 +265,28 @@ function _buildKeyResolver(headers, records){
 // ======== Multiple file stores & UI sync (non-breaking) ========
 const _incStore = [];
 const _decStore = [];
+// ファイルオブジェクトをキーにした回答情報のマップ
+const _fileAnswersMap = new Map();
 
 function _filesEqual(a,b){ return a.name===b.name && a.size===b.size && a.lastModified===b.lastModified; }
 
 function _mergeFiles(store, files){
   const arr = Array.from(files||[]);
+  const duplicates = [];
+  arr.forEach(f=>{
+    // name、size、lastModifiedすべてで判定
+    if(store.some(x=>f.name === x.name && f.size === x.size && f.lastModified === x.lastModified)){
+      duplicates.push(f.name);
+    }
+  });
+  
+  // 重複がある場合はエラーを表示
+  if(duplicates.length > 0){
+    alert(`同じファイルがアップロードされています:\n${duplicates.join('\n')}`);
+    return; // マージしない
+  }
+  
+  // 重複がなければ追加
   arr.forEach(f=>{
     if(!store.some(x=>_filesEqual(x,f))) store.push(f);
   });
@@ -311,6 +323,7 @@ function renderFileListFromStore(listEl, store){
   
   // ボタンの状態を更新
   updateRunButtonState();
+  updateAnswerQuestionsButtonState();
 }
 
 function _syncAll(input, store, listEl, countEl){
@@ -333,6 +346,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   
   // 初期状態でボタンを無効化
   updateRunButtonState();
+  updateAnswerQuestionsButtonState();
   
   if(answerQuestionsBtn){
     answerQuestionsBtn.addEventListener('click', ()=>{
@@ -401,12 +415,16 @@ function createModalFileItem(file, index, type){
   
   const size = formatFileSize(file.size);
   const typeLabel = type === 'increase' ? '増車' : '減車';
+  // 減車の場合は削除ボタンと同じ色（背景:#fee2e2、テキスト:#dc2626）を適用
+  const badgeStyle = type === 'decrease' 
+    ? 'background:#fee2e2; color:#dc2626; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:600;'
+    : 'background:#3b82f6; color:white; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:600;';
   
   div.innerHTML = `
     <div class="file-info">
       <span class="file-name">${file.name}</span>
       <span class="file-size">${size}</span>
-      <span style="background:#3b82f6; color:white; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:600;">${typeLabel}</span>
+      <span style="${badgeStyle}">${typeLabel}</span>
     </div>
     
     <div class="question-section">
@@ -461,12 +479,17 @@ function collectAnswersAndUpdateDisplay(){
     // ファイルの種類は元のアップロード時の分類を使用
     const fileType = incFiles.includes(file) ? 'increase' : 'decrease';
     
-    fileAnswers.push({
+    const answer = {
       file: file,
       fileType: fileType,
       carType: carTypeRadio ? carTypeRadio.value : '普通',
       weightClass: weightSelect ? weightSelect.value : 'to_2t'
-    });
+    };
+    
+    // ファイルオブジェクトをキーに回答をマップに保存
+    _fileAnswersMap.set(file, answer);
+    
+    fileAnswers.push(answer);
   });
   
   // ファイルリストを更新（アイコン表示）
@@ -487,17 +510,25 @@ function updateFileListWithAnswers(fileAnswers){
     div.className = 'filechip';
     const size = formatFileSize(answer.file.size);
     
+    // ストア内の実際のインデックスを取得
+    let actualIndex;
+    if(answer.fileType === 'increase'){
+      actualIndex = _incStore.indexOf(answer.file);
+    } else {
+      actualIndex = _decStore.indexOf(answer.file);
+    }
+    
     // アイコンと情報を表示
     const typeIcon = answer.fileType === 'increase' ? '📈' : '📉';
     const typeLabel = answer.fileType === 'increase' ? '増車' : '減車';
     
     div.innerHTML = `
-      <button class="del" data-file-index="${index}" aria-label="削除" style="font-size:20px; padding:4px 8px; margin-right:8px;">×</button>
+      <button class="del" data-idx="${actualIndex}" aria-label="削除" style="font-size:20px; padding:4px 8px; margin-right:8px;">×</button>
       <span class="name" title="${answer.file.name}">${answer.file.name}</span>
       <span class="size">${size}</span>
-      <span style="background:#3b82f6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; margin-left:8px;">${typeLabel}</span>
-      <span style="background:#10b981; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; margin-left:4px;">${answer.carType}</span>
-      <span style="background:#f59e0b; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; margin-left:4px;">${getWeightLabel(answer.weightClass)}</span>
+      <span style="background:#f59e0b; color:white; padding:3px 8px; border-radius:4px; font-size:16px; font-weight:600; margin-left:8px;">${typeLabel}</span>
+      <span style="background:#f59e0b; color:white; padding:3px 8px; border-radius:4px; font-size:16px; font-weight:600; margin-left:4px;">${answer.carType}</span>
+      <span style="background:#f59e0b; color:white; padding:3px 8px; border-radius:4px; font-size:16px; font-weight:600; margin-left:4px;">${getWeightLabel(answer.weightClass)}</span>
     `;
     
     if(answer.fileType === 'increase'){
@@ -515,6 +546,7 @@ function updateFileListWithAnswers(fileAnswers){
   
   // ボタンの状態を更新
   updateRunButtonState();
+  updateAnswerQuestionsButtonState();
 }
 
 // ファイルの質問回答状況を追跡する変数
@@ -536,9 +568,37 @@ function updateRunButtonState(){
   } else {
     // ファイルがあり、質問に答えた場合は有効化
     runBtn.disabled = false;
-    runBtn.style.background = '#3b82f6';
+    runBtn.style.background = '#1d4ed8';
     runBtn.style.cursor = 'pointer';
-    runBtn.style.boxShadow = '0 4px 12px rgba(59,130,246,0.3)';
+    runBtn.style.boxShadow = '0 4px 12px rgba(29,78,216,0.3)';
+  }
+}
+
+// 会社キー/拠点キー用：空白（半角/全角）を除去して比較用に正規化
+function normalizeKey(s){
+  return (s || '').replace(/[\s\u3000]+/g, '');
+}
+
+function updateAnswerQuestionsButtonState(){
+  const answerQuestionsBtn = document.getElementById('answerQuestionsBtn');
+  const incFiles = Array.from(_incStore);
+  const decFiles = Array.from(_decStore);
+  const allFiles = [...incFiles, ...decFiles];
+  
+  if(allFiles.length === 0){
+    // ファイルがない場合は無効化
+    answerQuestionsBtn.disabled = true;
+    answerQuestionsBtn.style.background = '#94a3b8';
+    answerQuestionsBtn.style.cursor = 'not-allowed';
+    answerQuestionsBtn.style.opacity = '0.6';
+    answerQuestionsBtn.style.boxShadow = '0 4px 12px rgba(148,163,184,0.3)';
+  } else {
+    // ファイルがある場合は有効化
+    answerQuestionsBtn.disabled = false;
+    answerQuestionsBtn.style.background = '#2563eb';
+    answerQuestionsBtn.style.cursor = 'pointer';
+    answerQuestionsBtn.style.opacity = '1';
+    answerQuestionsBtn.style.boxShadow = '0 4px 12px rgba(37,99,235,0.3)';
   }
 }
 
@@ -552,10 +612,19 @@ function addDeleteListeners(){
     incList.addEventListener('click', (e)=>{
       const btn = e.target.closest('.del');
       if(!btn) return;
-      const fileIndex = +btn.dataset.fileIndex;
+      const fileIndex = +btn.dataset.idx;
       if(Number.isInteger(fileIndex)){
+                // 削除対象のファイルを取得
+                const deletedFile = _incStore[fileIndex];
+                
                 // ストアからファイルを削除
                 _incStore.splice(fileIndex, 1);
+                
+                // マップからも回答情報を削除
+                if(deletedFile){
+                  _fileAnswersMap.delete(deletedFile);
+                }
+                
                 // ファイルリストを再生成
                 const incFiles = Array.from(_incStore);
                 const decFiles = Array.from(_decStore);
@@ -571,18 +640,18 @@ function addDeleteListeners(){
                   if(incCount) incCount.textContent = '';
                   if(decCount) decCount.textContent = '';
                 } else {
-                  // ファイルがある場合は回答付きで再表示
+                  // ファイルがある場合は回答付きで再表示（マップから回答情報を取得）
                   const fileAnswers = [];
-                  allFiles.forEach((file, index) => {
-                    const carTypeRadio = document.querySelector(`input[name="car_type_${index}"]:checked`);
-                    const weightSelect = document.querySelector(`select[name="weight_class_${index}"]`);
+                  allFiles.forEach((file) => {
+                    // マップから回答情報を取得、なければデフォルト値を使用
+                    const savedAnswer = _fileAnswersMap.get(file);
                     const fileType = incFiles.includes(file) ? 'increase' : 'decrease';
                     
                     fileAnswers.push({
                       file: file,
                       fileType: fileType,
-                      carType: carTypeRadio ? carTypeRadio.value : '普通',
-                      weightClass: weightSelect ? weightSelect.value : 'to_2t'
+                      carType: savedAnswer ? savedAnswer.carType : '普通',
+                      weightClass: savedAnswer ? savedAnswer.weightClass : 'to_2t'
                     });
                   });
                   updateFileListWithAnswers(fileAnswers);
@@ -593,6 +662,7 @@ function addDeleteListeners(){
                 
                 // ボタンの状態を更新
                 updateRunButtonState();
+                updateAnswerQuestionsButtonState();
       }
     });
   }
@@ -602,10 +672,18 @@ function addDeleteListeners(){
     decList.addEventListener('click', (e)=>{
       const btn = e.target.closest('.del');
       if(!btn) return;
-      const fileIndex = +btn.dataset.fileIndex;
+      const fileIndex = +btn.dataset.idx;
       if(Number.isInteger(fileIndex)){
+                // 削除対象のファイルを取得
+                const deletedFile = _decStore[fileIndex];
+                
                 // ストアからファイルを削除
                 _decStore.splice(fileIndex, 1);
+                
+                // マップからも回答情報を削除
+                if(deletedFile){
+                  _fileAnswersMap.delete(deletedFile);
+                }
                 // ファイルリストを再生成
                 const incFiles = Array.from(_incStore);
                 const decFiles = Array.from(_decStore);
@@ -621,18 +699,18 @@ function addDeleteListeners(){
                   if(incCount) incCount.textContent = '';
                   if(decCount) decCount.textContent = '';
                 } else {
-                  // ファイルがある場合は回答付きで再表示
+                  // ファイルがある場合は回答付きで再表示（マップから回答情報を取得）
                   const fileAnswers = [];
-                  allFiles.forEach((file, index) => {
-                    const carTypeRadio = document.querySelector(`input[name="car_type_${index}"]:checked`);
-                    const weightSelect = document.querySelector(`select[name="weight_class_${index}"]`);
+                  allFiles.forEach((file) => {
+                    // マップから回答情報を取得、なければデフォルト値を使用
+                    const savedAnswer = _fileAnswersMap.get(file);
                     const fileType = incFiles.includes(file) ? 'increase' : 'decrease';
                     
                     fileAnswers.push({
                       file: file,
                       fileType: fileType,
-                      carType: carTypeRadio ? carTypeRadio.value : '普通',
-                      weightClass: weightSelect ? weightSelect.value : 'to_2t'
+                      carType: savedAnswer ? savedAnswer.carType : '普通',
+                      weightClass: savedAnswer ? savedAnswer.weightClass : 'to_2t'
                     });
                   });
                   updateFileListWithAnswers(fileAnswers);
@@ -643,6 +721,7 @@ function addDeleteListeners(){
                 
                 // ボタンの状態を更新
                 updateRunButtonState();
+                updateAnswerQuestionsButtonState();
       }
     });
   }
@@ -816,6 +895,70 @@ window.addEventListener('resize', resizeDB);
 let DB = {headers:[], records:[]};
 let editable = false;
 let selectedRow = null;
+let dbIsDirty = false; // データベースの変更状態を追跡
+
+// 編集セル移動用ユーティリティ（Excel風操作）
+function focusCellAtEnd(td){
+  if(!td) return;
+  td.focus();
+  const sel = window.getSelection();
+  if(!sel) return;
+  const range = document.createRange();
+  range.selectNodeContents(td);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+function moveToCellBelow(currentTd){
+  if(!currentTd) return;
+  const tr = currentTd.closest('tr');
+  const col = currentTd.getAttribute('data-col');
+  if(!tr || !col) return;
+  const nextTr = tr.nextElementSibling;
+  if(!nextTr) return;
+  const nextTd = nextTr.querySelector(`td[data-col="${col}"]`);
+  if(nextTd){
+    // 緑の枠を更新
+    if(selectedRow) selectedRow.classList.remove('selected');
+    selectedRow = nextTr;
+    selectedRow.classList.add('selected');
+    focusCellAtEnd(nextTd);
+  }
+}
+function moveToCellAbove(currentTd){
+  if(!currentTd) return;
+  const tr = currentTd.closest('tr');
+  const col = currentTd.getAttribute('data-col');
+  if(!tr || !col) return;
+  const prevTr = tr.previousElementSibling;
+  if(!prevTr) return;
+  const prevTd = prevTr.querySelector(`td[data-col="${col}"]`);
+  if(prevTd){
+    // 緑の枠を更新
+    if(selectedRow) selectedRow.classList.remove('selected');
+    selectedRow = prevTr;
+    selectedRow.classList.add('selected');
+    focusCellAtEnd(prevTd);
+  }
+}
+function insertLineBreakInCell(td){
+  // キャレット位置に<br>を挿入して、その直後にキャレットを移動
+  const sel = window.getSelection();
+  if(!sel || sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+  // 操作対象が当該セル内であることを保証
+  if(!td.contains(range.startContainer)){
+    focusCellAtEnd(td);
+  }
+  const br = document.createElement('br');
+  range.deleteContents();
+  range.insertNode(br);
+  // <br>の後ろにキャレットを移す
+  range.setStartAfter(br);
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
 
 async function loadDB(){
   document.getElementById('db-msg').textContent = '読み込み中…';
@@ -825,7 +968,7 @@ async function loadDB(){
     const flat = await res.json();
     DB = {headers: flat.headers || [], records: flat.records || []};
     renderTable();
-    document.getElementById('db-msg').textContent = `ヘッダ${DB.headers.length} / 行${DB.records.length}`;
+    document.getElementById('db-msg').textContent = '';
   }catch(e){
     document.getElementById('db-msg').textContent = '取得失敗: ' + e.message;
   }
@@ -833,16 +976,40 @@ async function loadDB(){
 
 function renderTable(){
   const tbl = document.getElementById('db-table');
-  const thead = `<thead><tr>${DB.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`;
+  // 表示用ヘッダ（会社キー・拠点キーは非表示）
+  const displayHeaders = DB.headers.filter(h => h !== '会社キー' && h !== '拠点キー');
+  const thead = `<thead><tr>${[''].concat(displayHeaders).map((h,i)=> i===0 ? `<th style="width:56px; text-align:right; color:#64748b;"> </th>` : `<th>${h}</th>`).join('')}</tr></thead>`;
   const keyMap = _buildKeyResolver(DB.headers, DB.records);
+  
+  // キー列を自動更新
+  DB.records.forEach((record, idx) => {
+    if (record && typeof record === 'object') {
+      // 会社キーを会社名から設定
+      record['会社キー'] = record['会社名'] || '';
+      
+      // 拠点キーを営業所所在地と本社/営業所/支店から設定
+      const location = record['営業所所在地'] || '';
+      const type = record['本社/営業所/支店'] || '';
+      
+      if (location.trim() === '') {
+        record['拠点キー'] = `|${type}`;
+      } else {
+        record['拠点キー'] = `${location}|${type}`;
+      }
+    }
+  });
+  
   const tbody = `<tbody>${
     DB.records.map((r, idx)=>{
-      const row = Array.isArray(r) ? r : DB.headers.map(h => (r?.[keyMap[h]] ?? ""));
-      return `<tr data-idx="${idx}">` + row.map((c,i)=>{
-        const h = DB.headers[i] || '';
+      // 表示用にキー列を除いた値配列を生成
+      const rowObj = Array.isArray(r) ? Object.fromEntries(DB.headers.map((h,i)=>[DB.headers[i], r[i]])) : r || {};
+      return `<tr data-idx="${idx}">` + [`<td data-col="_rownum" style="text-align:right; color:#64748b; font-weight:600;">${idx+1}</td>`].concat(displayHeaders.map((h)=>{
+        const c = rowObj?.[keyMap[h]] ?? rowObj?.[h] ?? '';
         const ce = editable ? 'contenteditable="true"' : '';
-        return `<td ${ce} data-col="${h}">${c ?? ''}</td>`;
-      }).join('') + `</tr>`;
+        // 会社名は太字で表示
+        const boldStyle = h === '会社名' ? ' style="font-weight:700;"' : '';
+        return `<td ${ce} data-col="${h}"${boldStyle}>${c ?? ''}</td>`;
+      })).join('') + `</tr>`;
     }).join('')
   }</tbody>`;
   tbl.innerHTML = thead + tbody;
@@ -851,19 +1018,147 @@ function renderTable(){
       if(selectedRow) selectedRow.classList.remove('selected');
       selectedRow = tr; tr.classList.add('selected');
     });
+    
+    // セル編集時のキー列自動更新
+    tr.querySelectorAll('td[contenteditable="true"]').forEach(td => {
+      // Enterで下セル、Alt+Enterで改行、Shift+Enterで上セル
+      td.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter'){
+          if(e.altKey){
+            // Alt+Enter: 明示的にセル内改行
+            e.preventDefault();
+            insertLineBreakInCell(td);
+            return;
+          }
+          if(e.shiftKey){
+            // 上セルへ移動
+            e.preventDefault();
+            moveToCellAbove(td);
+            return;
+          }
+          // 下セルへ移動
+          e.preventDefault();
+          moveToCellBelow(td);
+        }
+      });
+      td.addEventListener('blur', () => {
+        const col = td.getAttribute('data-col');
+        const rowIdx = parseInt(tr.getAttribute('data-idx'));
+        const newValue = td.textContent.trim();
+        
+        // 会社名、営業所所在地、本社/営業所/支店が変更された場合
+        if (col === '会社名' || col === '営業所所在地' || col === '本社/営業所/支店') {
+          const record = DB.records[rowIdx];
+          if (record && typeof record === 'object') {
+            record[col] = newValue;
+            
+            // 会社キーを更新
+            if (col === '会社名') {
+              record['会社キー'] = newValue;
+            }
+            
+            // 拠点キーを更新
+            const location = record['営業所所在地'] || '';
+            const type = record['本社/営業所/支店'] || '';
+            
+            if (location.trim() === '') {
+              record['拠点キー'] = `|${type}`;
+            } else {
+              record['拠点キー'] = `${location}|${type}`;
+            }
+            
+            // キー列の表示を更新（現在は非表示のため存在チェック）
+            const keyTd = tr.querySelector('td[data-col="会社キー"]');
+            const officeKeyTd = tr.querySelector('td[data-col="拠点キー"]');
+            if(keyTd) keyTd.textContent = record['会社キー'] || '';
+            if(officeKeyTd) officeKeyTd.textContent = record['拠点キー'] || '';
+            
+            // 重複チェック（会社キーと拠点キーが両方入力されている場合のみ）
+            const companyKey = record['会社キー'] || '';
+            const officeKey = record['拠点キー'] || '';
+            
+            if(companyKey && officeKey){
+              // 同じ会社キーと拠点キーの組み合わせが、他の行に存在するかチェック
+              const isDuplicate = DB.records.some((otherRecord, otherIdx) => {
+                // 現在の行は除外
+                if(otherIdx === rowIdx) return false;
+                const otherCompanyKey = normalizeKey(otherRecord['会社キー'] || '');
+                const otherOfficeKey = normalizeKey(otherRecord['拠点キー'] || '');
+                return otherCompanyKey === normalizeKey(companyKey) && otherOfficeKey === normalizeKey(officeKey);
+              });
+              
+              if(isDuplicate){
+                alert('既に登録されています。');
+                // 変更を元に戻す
+                if (col === '会社名') {
+                  record['会社キー'] = '';
+                }
+                const location = record['営業所所在地'] || '';
+                const type = record['本社/営業所/支店'] || '';
+                if (location.trim() === '') {
+                  record['拠点キー'] = `|${type}`;
+                } else {
+                  record['拠点キー'] = `${location}|${type}`;
+                }
+                // 表示を更新（現在は非表示のため存在チェック）
+                const keyTd2 = tr.querySelector('td[data-col="会社キー"]');
+                const officeKeyTd2 = tr.querySelector('td[data-col="拠点キー"]');
+                if(keyTd2) keyTd2.textContent = record['会社キー'] || '';
+                if(officeKeyTd2) officeKeyTd2.textContent = record['拠点キー'] || '';
+                td.textContent = ''; // セルの内容をクリア
+                return; // 変更フラグを設定しない
+              }
+            }
+            
+            // 変更フラグを設定
+            dbIsDirty = true;
+          }
+        } else {
+          // その他の列も変更フラグを設定
+          const record = DB.records[rowIdx];
+          if (record && typeof record === 'object') {
+            record[col] = newValue;
+            dbIsDirty = true;
+          }
+        }
+      });
+    });
   });
 }
 
-document.getElementById('db-edit').addEventListener('click', ()=>{
-  editable = !editable;
-  renderTable();
+document.getElementById('db-edit').addEventListener('click', async ()=>{
+  // 編集モードから閲覧モードに戻る場合
+  if(editable){
+    // 保存されていない変更があるかチェック
+    if(dbIsDirty){
+      if(!confirm('保存しないで終了してよろしいですか？')){
+        return; // キャンセルされた場合は何もしない
+      }
+    }
+    // 編集モードを終了
+    editable = false;
+    renderTable();
+    updateEditModeUI(false);
+    // ボタンテキストを変更
+    document.getElementById('db-edit').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>編集開始';
+  } else {
+    // 閲覧モードから編集モードに移行
+    editable = true;
+    renderTable();
+    updateEditModeUI(true);
+    // ボタンテキストを変更
+    document.getElementById('db-edit').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>編集終了';
+  }
+});
+
+function updateEditModeUI(editMode){
   const modeIndicator = document.getElementById('mode-indicator');
   const saveBtn = document.getElementById('db-save');
   const addAboveBtn = document.getElementById('db-add-above');
   const addBtn = document.getElementById('db-add');
   const delBtn = document.getElementById('db-del');
   
-  if(editable){
+  if(editMode){
     modeIndicator.textContent = '編集モード';
     modeIndicator.style.color = '#10b981';
     modeIndicator.style.borderColor = '#10b981';
@@ -915,8 +1210,11 @@ document.getElementById('db-edit').addEventListener('click', ()=>{
     delBtn.style.background = '#94a3b8';
     delBtn.style.cursor = 'not-allowed';
     delBtn.style.opacity = '0.6';
+    
+    // 変更フラグをクリア
+    dbIsDirty = false;
   }
-});
+}
 document.getElementById('db-add-above').addEventListener('click', ()=>{
   if(!editable){ alert('編集開始を押してください'); return; }
   if(!selectedRow){ alert('行を選択してください'); return; }
@@ -924,32 +1222,97 @@ document.getElementById('db-add-above').addEventListener('click', ()=>{
   const empty = Object.fromEntries(DB.headers.map(h=>[h,'']));
   DB.records.splice(idx, 0, empty); 
   selectedRow = null; 
+  dbIsDirty = true; // 変更を記録
   renderTable();
 });
 document.getElementById('db-add').addEventListener('click', ()=>{
   if(!editable){ alert('編集開始を押してください'); return; }
   const empty = Object.fromEntries(DB.headers.map(h=>[h,'']));
-  DB.records.push(empty); renderTable();
+  DB.records.push(empty); 
+  dbIsDirty = true; // 変更を記録
+  renderTable();
 });
 document.getElementById('db-del').addEventListener('click', ()=>{
   if(!editable){ alert('編集開始を押してください'); return; }
   if(!selectedRow){ alert('削除する行を選択してください'); return; }
   if(!confirm('選択行を削除します。よろしいですか？')) return;
   const idx = parseInt(selectedRow.dataset.idx, 10);
-  DB.records.splice(idx, 1); selectedRow = null; renderTable();
+  DB.records.splice(idx, 1); 
+  selectedRow = null; 
+  dbIsDirty = true; // 変更を記録
+  renderTable();
 });
 document.getElementById('db-save').addEventListener('click', async ()=>{
   if(!editable){ alert('編集開始を押してください'); return; }
   const rows = Array.from(document.querySelectorAll('#db-table tbody tr'));
-  DB.records = rows.map(tr=>{
+
+  // テーブルからオブジェクトを再構築（非表示のキー列は既存値を保持）
+  const nextRecords = rows.map((tr, idx)=>{
     const tds = Array.from(tr.querySelectorAll('td'));
-    const obj = {}; tds.forEach(td=> obj[td.dataset.col] = td.textContent); return obj;
+    const obj = {};
+    tds.forEach(td=> obj[td.dataset.col] = td.textContent.trim());
+    // 裏で保持しているキー列を維持
+    obj['会社キー'] = (DB.records[idx]?.['会社キー'] ?? '');
+    obj['拠点キー'] = (DB.records[idx]?.['拠点キー'] ?? '');
+    return obj;
   });
+
+  // 行ごとの合計一致バリデーション
+  function toInt(v){
+    const n = parseInt(String(v ?? '').replace(/[^\d-]/g,''),10);
+    return isNaN(n) ? 0 : n;
+  }
+  const typeCols = ['普通','小型','けん引','被けん引'];
+  const weightCols = ['2.0トンまで','2.0トンロング','2.0トンロング超～7.5トンまで','7.5トンを超えるもの'];
+
+  // 全行を検証し、不一致をまとめて報告・ハイライト
+  const invalidRows = [];
+  for(let i=0;i<nextRecords.length;i++){
+    const rec = nextRecords[i];
+    const tr = rows[i];
+    const sumTypes = typeCols.reduce((s,k)=> s + toInt(rec[k]), 0);
+    const sumWeights = weightCols.reduce((s,k)=> s + toInt(rec[k]), 0);
+    const companyName = (rec['会社名'] || '').trim();
+    // 既存の不一致クラスをクリア（編集中も視覚化を維持するためクラスで管理）
+    tr.classList.remove('invalid-row');
+    // どちらも0のケースは許容（空行）
+    if(sumTypes !== sumWeights){
+      // 不一致の行をハイライト（薄い水色を継続）
+      tr.classList.add('invalid-row');
+      invalidRows.push({companyName, sumTypes, sumWeights});
+    }
+  }
+
+  // 不一致があった場合に一括報告
+  if(invalidRows.length > 0){
+    const labels = invalidRows.map(r => {
+      const label = r.companyName ? `"${r.companyName}"（種別:${r.sumTypes}台 ≠ 積載量別:${r.sumWeights}台）` : `（種別:${r.sumTypes}台 ≠ 積載量別:${r.sumWeights}台）`;
+      return label;
+    });
+    
+    // アラートの代わりに、詳細をコンソールに出力してからアラート
+    console.error('車両合計数が一致しません:', invalidRows);
+    
+    // ユーザー向けには簡潔なメッセージ（件数に関わらず同じフォーマット）
+    const separator = 'ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー';
+    const header = `${invalidRows.length}件の会社で車両合計数が一致しません:`;
+    const summary = `${header}\n${separator}\n\n\n${labels.join('\n\n\n')}`;
+    
+    alert(summary);
+    return; // 保存中止
+  }
+
+  DB.records = nextRecords;
+
   try{
     const res = await fetch('/db/save', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(DB)});
     if(!res.ok){ throw new Error(await res.text()); }
     document.getElementById('db-msg').textContent = '保存しました';
-    editable = false; await loadDB();
+    dbIsDirty = false; // 保存完了したのでフラグをクリア
+    editable = false; 
+    updateEditModeUI(false); // UIを更新してボタン名を"編集開始"に戻す
+    document.getElementById('db-edit').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>編集開始';
+    await loadDB();
   }catch(e){
     alert('保存に失敗: ' + e.message);
   }
@@ -1062,6 +1425,7 @@ runBtn.addEventListener('click', async ()=>{
     
     // ボタンの状態を更新
     updateRunButtonState();
+    updateAnswerQuestionsButtonState();
     
   }catch(e){
     upStatus.textContent = '失敗: ' + e.message;
@@ -1085,8 +1449,23 @@ function xhrPostWithProgress(url, formData, onProgress){
       if(xhr.status >= 200 && xhr.status < 300){
         resolve(xhr.response);
       }else{
+        // エラーレスポンスをテキストとして読み取り
         const reader = new FileReader();
-        reader.onload = ()=> reject(new Error(reader.result || ('HTTP '+xhr.status)));
+        reader.onload = ()=> {
+          try {
+            // JSONレスポンスの場合
+            const responseText = reader.result;
+            const jsonResponse = JSON.parse(responseText);
+            if(jsonResponse.error) {
+              reject(new Error(jsonResponse.error));
+            } else {
+              reject(new Error(responseText || ('HTTP '+xhr.status)));
+            }
+          } catch (e) {
+            // JSONでない場合はそのまま表示
+            reject(new Error(reader.result || ('HTTP '+xhr.status)));
+          }
+        };
         reader.readAsText(xhr.response);
       }
     };

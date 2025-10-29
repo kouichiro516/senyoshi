@@ -282,11 +282,8 @@ OUTPUT.mkdir(exist_ok=True); DATA.mkdir(exist_ok=True)
 TPL_NAME = "申請書共通.xlsx"
 
 def js_alert(msg: str, status: int = 400):
-    html = f"""<script>alert({json.dumps(msg)});history.back();</script>"""
-    # 4xxで返してXHR側を確実に失敗扱いにする
-    r = make_response(html, status)
-    r.headers["Content-Type"] = "text/html; charset=utf-8"
-    return r
+    # JSONレスポンスでエラーメッセージを返す
+    return {"error": msg}, status
 
 def norm_spaces(s:str)->str:
     if s is None: return ""
@@ -429,6 +426,7 @@ from openpyxl.utils import get_column_letter
 
 HONSHI_INC_PATH = SRC / "申請書増車1.xlsx"
 HONSHI_DEC_PATH = SRC / "申請書減車1.xlsx"
+HONSHI_MIX_PATH = SRC / "申請書増減1.xlsx"
 
 def _copy_sheet_content(src_ws, dst_ws):
     """シート間コピー（値・基本書式・列幅/行高・結合・フリーズ等）。画像/図形/コメントは対象外。"""
@@ -474,11 +472,16 @@ def _copy_sheet_content(src_ws, dst_ws):
 def prepend_honshi_sheet(out_path: Path, prefer: str):
     """
     out_path: 生成済みの別紙ファイル（すでに内容転記済み）
-    prefer: "increase" か "decrease"
+    prefer: "increase" か "decrease" か "both"
     既存のシートを「別紙」にリネームし、先頭に「本紙」を追加して保存。
     """
     # どちらの本紙を使うか
-    honshi_path = HONSHI_INC_PATH if prefer == "increase" else HONSHI_DEC_PATH
+    if prefer == "both":
+        honshi_path = HONSHI_MIX_PATH
+    elif prefer == "increase":
+        honshi_path = HONSHI_INC_PATH
+    else:
+        honshi_path = HONSHI_DEC_PATH
     # 既存出力
     wb = load_workbook(out_path)
     # 既存シート名調整（シート2）
@@ -532,19 +535,73 @@ def db_save():
 @app.get("/db/csv")
 def db_csv():
     flat = load_db_raw()
-    headers = flat.get("headers", [])
+    all_headers = flat.get("headers", [])
     recs = flat.get("records", [])
+    
+    # H列（空文字列）以降を除外してA列～G列のみを抽出
+    try:
+        empty_idx = all_headers.index("")
+        original_headers = all_headers[:empty_idx]  # 空文字列より前まで（A列～G列）
+    except ValueError:
+        # 空文字列が見つからない場合は全列を出力
+        original_headers = all_headers
+    
+    # CSV出力用のヘッダー名を設定（A～C列はそのまま、D～F列は計算値）
+    # A列: 会社名、B列: 営業所所在地、C列: 本社/営業所/支店
+    csv_headers = original_headers[:3]  # A～C列
+    csv_headers.extend(["合計", "EQ", "シャーシ"])  # D～F列
+
+    def to_int(v):
+        """値を整数に変換"""
+        if v is None:
+            return 0
+        try:
+            return int(float(str(v).strip()))
+        except:
+            return 0
 
     def generate():
-        yield ",".join(headers) + "\n"
+        # UTF-8 BOM を付与してExcelで文字化けを防ぐ
+        yield "\ufeff"
+        yield ",".join(csv_headers) + "\n"
+        
         for r in recs:
-            row = [str((r.get(h, "") if isinstance(r, dict) else "")) for h in headers]
+            if not isinstance(r, dict):
+                continue
+            
+            # A～C列はそのまま
+            row = [
+                str(r.get(original_headers[0], "")),  # A列: 会社名
+                str(r.get(original_headers[1], "")),  # B列: 営業所所在地
+                str(r.get(original_headers[2], ""))   # C列: 本社/営業所/支店
+            ]
+            
+            # D～G列の値を取得
+            futsu = to_int(r.get(original_headers[3], 0))   # 普通
+            small = to_int(r.get(original_headers[4], 0))      # 小型
+            kenin = to_int(r.get(original_headers[5], 0))      # けん引
+            hikkenin = to_int(r.get(original_headers[6], 0))   # 被けん引
+            
+            # D列: 合計（普通 + 小型 + けん引 + 被けん引）
+            total = futsu + small + kenin + hikkenin
+            row.append(str(total))
+            
+            # E列: EQ（普通 + 小型 + けん引）
+            eq = futsu + small + kenin
+            row.append(str(eq))
+            
+            # F列: シャーシ（被けん引）
+            row.append(str(hikkenin))
+            
             yield ",".join(row) + "\n"
 
     return Response(
         generate(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=counter.csv"},
+        mimetype="text/csv; charset=utf-8-sig",
+        headers={
+            "Content-Disposition": "attachment; filename=counter.csv",
+            "Content-Type": "text/csv; charset=utf-8-sig"
+        },
     )
 
 # === Block-based label removal & model year writers (C-block/M-block, H-block/R-block) ===
@@ -707,7 +764,7 @@ def process():
     companies = {m[1]["user_name"] for m in metas}
     offices = {m[1]["office_name"] for m in metas}
     if len(companies) != 1 or len(offices) != 1:
-        return js_alert("アップロード内で会社名/営業所名が混在しています。1社1拠点で実行してください。", status=400)
+        return js_alert("同じ会社＆営業所のファイルをアップロードしてください。", status=400)
     
     # 同一会社同一営業所の場合は増車と減車の同時アップロードを許可
     # 異なる会社・営業所の場合は増車と減車の同時アップロードを禁止
@@ -806,7 +863,13 @@ def process():
     # 年式：1〜5件目はH列、6〜10件目はR列
     apply_model_years(out_name, modes, inc_files, dec_files, sheet_index=0)
 
-    prefer = "increase" if len(inc_files) > 0 else "decrease"
+    # 増車のみ→申請書増車1.xlsx、減車のみ→申請書減車1.xlsx、増減車混在→申請書増減1.xlsx
+    if len(inc_files) > 0 and len(dec_files) > 0:
+        prefer = "both"
+    elif len(inc_files) > 0:
+        prefer = "increase"
+    else:
+        prefer = "decrease"
     prepend_honshi_sheet(out_name, prefer)
     
     # C/Mの片側だけ不要語を削除 + F列に最大積載量
