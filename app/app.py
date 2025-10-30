@@ -54,11 +54,11 @@ def apply_label_toggle_single(xlsx: Path, modes, sheet_index: int = 0,
     ws = wb.worksheets[sheet_index]
 
     rows = list(range(start_row, end_row + 1))
-    modes = list(modes)
-    limit = min(len(rows), len(modes))
+    modes = list(modes)[:10]  # 最大10件まで
+    limit = min(10, len(modes))
 
     for i in range(limit):
-        row = rows[i]
+        row = rows[i % len(rows)]
         keep = "増車" if str(modes[i]).lower().startswith("inc") or modes[i] == "増車" else "減車"
         col = col_inc if keep == "増車" else col_dec
         cell = ws[f"{col}{row}"]
@@ -112,18 +112,24 @@ def _get_letter_max_load(file_storage, mode: str) -> int | None:
         return None
 
 def apply_max_loads(xlsx: Path, modes, inc_files, dec_files, sheet_index: int = 0,
-                    start_row=21, end_row=25, dest_col="F"):
-    """F21..F25に「<整数> kg」を書く。増車→inc_files、減車→dec_files を順番に対応。"""
+                    start_row=21, end_row=25, dest_cols=("F","P"), dest_col=None):
+    """
+    最大積載量を記入する。
+    - 1〜5件目: F21..F25
+    - 6〜10件目: P21..P25
+    旧引数 dest_col が与えられた場合は、全行その列に記入（後方互換）。
+    増車→inc_files、減車→dec_files を順番に対応。
+    """
     wb = _safe_load_wb(xlsx, data_only=False)
     ws = wb.worksheets[sheet_index]
 
     rows = list(range(start_row, end_row + 1))
-    modes = list(modes)
-    limit = min(len(rows), len(modes))
+    modes = list(modes)[:10]
+    limit = min(10, len(modes))
 
     ii = 0; dd = 0
     for i in range(limit):
-        row = rows[i]
+        row = rows[i % len(rows)]
         mode = modes[i]
         if str(mode).lower().startswith("inc") or mode == "増車":
             if ii >= len(inc_files): 
@@ -141,7 +147,8 @@ def apply_max_loads(xlsx: Path, modes, inc_files, dec_files, sheet_index: int = 
         except Exception:
             pass
         if val is not None:
-            ws[f"{dest_col}{row}"].value = f"{val} kg"
+            col_to_write = dest_col if dest_col else (dest_cols[0] if i < 5 else dest_cols[1])
+            ws[f"{col_to_write}{row}"].value = f"{val} kg"
 
     try:
         from openpyxl.workbook.properties import CalcProperties
@@ -625,6 +632,15 @@ def apply_label_toggle_blocked(xlsx: Path, modes, sheet_index: int = 0,
         if isinstance(val, str) and val.strip():
             cell.value = _strip_label_text_single(val, keep)
 
+        # 営業所名（B5）を各行へも転記：1〜5件目はB列、6〜10件目はJ列
+        try:
+            office_name = ws["B5"].value
+            if office_name:
+                dest_office_col = "B" if i < 5 else "J"
+                ws[f"{dest_office_col}{row}"] = office_name
+        except Exception:
+            pass
+
     # B21 に B5 の営業所名を転記
     try:
         b5 = ws["B5"].value
@@ -858,8 +874,8 @@ def process():
 
     # C/Mブロック：1〜5件目はC列、6〜10件目はM列のみ不要語を削除
     apply_label_toggle_blocked(out_name, modes, sheet_index=0)
-    # F列：最大積載量
-    apply_max_loads(out_name, modes, inc_files, dec_files, sheet_index=0, dest_col="F")
+    # 最大積載量：1〜5件目はF列、6〜10件目はP列
+    apply_max_loads(out_name, modes, inc_files, dec_files, sheet_index=0)
     # 年式：1〜5件目はH列、6〜10件目はR列
     apply_model_years(out_name, modes, inc_files, dec_files, sheet_index=0)
 
